@@ -96,16 +96,19 @@
     </div>
   </div>
 <script>
-// No service worker registration here to avoid caching issues during setup
+// (keep SW disabled during setup to avoid caching issues)
 
+// ---------- CONFIG ----------
 const CFG = {
-  storeId:     getParam('store')  || 'CL-STORE-001',
+  apiUrl: "https://script.google.com/macros/s/AKfycbxBYq0mQqYV0U-poqzX6dhkeSA7udcWnZlGVRiwppv6Tz-vU0gDfpn1yUBYUs8vE3o/exec", // <--- paste the /exec URL
+  storeId:     getParam('store')  || 'CL-PTA-001',
   deviceLabel: getParam('device') || 'Front Counter',
   deviceId:    '',
   ALERT_WEBHOOK_URL: ''
 };
 function getParam(k){ const u=new URL(location.href); return u.searchParams.get(k); }
 
+// ---------- QUESTIONS ----------
 const QUESTIONS = [
   { id:'Q1', text:'Speed of service' },
   { id:'Q2', text:'Friendliness of staff' },
@@ -121,48 +124,28 @@ const CHOICES = [
   { txt:'Bad',       score:1, emo:'😡', color:'var(--red)',    fg:'#fff' }
 ];
 
+// ---------- RENDER ----------
 function renderQuestions(){
   const wrap = document.getElementById('questions');
   wrap.textContent = '';
   QUESTIONS.forEach(q=>{
-    const holder = document.createElement('div');
-    holder.className = 'q';
-    const title = document.createElement('div');
-    title.className = 'q-title';
-    title.textContent = q.text;
-    const row = document.createElement('div');
-    row.className = 'q-grid';
-    row.dataset.qid = q.id;
+    const holder = document.createElement('div'); holder.className = 'q';
+    const title  = document.createElement('div'); title.className = 'q-title'; title.textContent = q.text;
+    const row    = document.createElement('div'); row.className = 'q-grid'; row.dataset.qid = q.id;
 
     CHOICES.forEach(c=>{
-      const lab = document.createElement('label');
-      lab.className = 'opt';
-      lab.dataset.score = String(c.score);
-      lab.style.background = c.color;
-      lab.style.color = c.fg;
+      const lab = document.createElement('label'); lab.className = 'opt'; lab.dataset.score = String(c.score);
+      lab.style.background = c.color; lab.style.color = c.fg;
 
-      const input = document.createElement('input');
-      input.type = 'radio';
-      input.name = q.id;
-      input.value = String(c.score);
+      const input = document.createElement('input'); input.type='radio'; input.name=q.id; input.value=String(c.score);
+      const emo = document.createElement('div'); emo.className='emo'; emo.textContent=c.emo;
+      const lbl = document.createElement('div'); lbl.className='lbl'; lbl.textContent=c.txt;
 
-      const emo = document.createElement('div');
-      emo.className = 'emo';
-      emo.textContent = c.emo;
-
-      const lbl = document.createElement('div');
-      lbl.className = 'lbl';
-      lbl.textContent = c.txt;
-
-      lab.appendChild(input);
-      lab.appendChild(emo);
-      lab.appendChild(lbl);
+      lab.appendChild(input); lab.appendChild(emo); lab.appendChild(lbl);
       row.appendChild(lab);
     });
 
-    holder.appendChild(title);
-    holder.appendChild(row);
-    wrap.appendChild(holder);
+    holder.appendChild(title); holder.appendChild(row); wrap.appendChild(holder);
   });
 
   wrap.querySelectorAll('.q-grid').forEach(grid=>{
@@ -176,6 +159,7 @@ function renderQuestions(){
   });
 }
 
+// ---------- VALIDATION ----------
 function allAnswered(){ return QUESTIONS.every(q => !!document.querySelector(`input[name="${q.id}"]:checked`)); }
 function needsPOPIA(){
   return !!(document.getElementById('name').value.trim() ||
@@ -187,25 +171,59 @@ function updateSubmitState(){
   document.getElementById('submitBtn').disabled = !ok;
 }
 
-function onSubmit(){
+// ---------- SUBMIT (saves to Google Sheet) ----------
+async function onSubmit(){
   if(!allAnswered()){ toast('Please answer all questions'); return; }
   if(needsPOPIA() && !document.getElementById('popia').checked){
     toast('Please tick POPIA consent if you provide personal details'); return;
   }
-  document.getElementById('thanks').style.display='grid';
-  setTimeout(()=>{
-    document.getElementById('thanks').style.display='none';
-    document.querySelectorAll('input[type=radio]').forEach(i=>i.checked=false);
-    document.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
-    ['name','surname','phone','feedback'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('popia').checked=false;
-    updateSubmitState();
-  }, 1600);
+  const answers = QUESTIONS.map(q=>{
+    const score  = Number(document.querySelector(`input[name="${q.id}"]:checked`).value);
+    const choice = CHOICES.find(c=>c.score===score);
+    return { questionId:q.id, choiceText:choice.txt, choiceScore:score };
+  });
+
+  const payload = {
+    clientId: `${Date.now()}-${(crypto.getRandomValues(new Uint32Array(1))[0]).toString(16)}`, // dedupe safety
+    storeId: CFG.storeId, deviceLabel: CFG.deviceLabel, deviceId: CFG.deviceId || '',
+    pressedAtUtc: new Date().toISOString(),
+    answers,
+    customer:{
+      name:document.getElementById('name').value.trim(),
+      surname:document.getElementById('surname').value.trim(),
+      phone:document.getElementById('phone').value.trim(),
+      feedback:document.getElementById('feedback').value.trim(),
+      consent: document.getElementById('popia').checked || null
+    }
+  };
+
+  try{
+    const r = await fetch(CFG.apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // no CORS preflight
+      body: JSON.stringify(payload)
+    });
+    const txt = await r.text();
+    if (!r.ok || !/\"ok\"\s*:\s*true/.test(txt)) throw new Error(txt);
+
+    // thank-you + reset for next customer
+    document.getElementById('thanks').style.display='grid';
+    setTimeout(()=>{
+      document.getElementById('thanks').style.display='none';
+      document.querySelectorAll('input[type=radio]').forEach(i=>i.checked=false);
+      document.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
+      ['name','surname','phone','feedback'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('popia').checked=false;
+      updateSubmitState();
+      toast(''); // clear
+    }, 1200);
+  } catch (e) {
+    toast('Network/server error');
+  }
 }
-function toast(msg){
-  const s = document.getElementById('statusTxt');
-  s.textContent = msg; clearTimeout(s._t); s._t = setTimeout(()=> s.textContent='', 2200);
-}
+
+// ---------- Helpers ----------
+function toast(msg){ const s=document.getElementById('statusTxt'); s.textContent=msg; clearTimeout(s._t); s._t=setTimeout(()=>s.textContent='',2500); }
 function init(){
   renderQuestions(); updateSubmitState();
   document.addEventListener('input', e=>{ if(['name','surname','phone','feedback','popia'].includes(e.target.id)) updateSubmitState(); });
@@ -215,5 +233,6 @@ function init(){
 }
 window.addEventListener('DOMContentLoaded', init);
 </script>
+
 </body>
 </html>
