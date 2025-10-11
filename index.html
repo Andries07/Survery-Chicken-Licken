@@ -125,7 +125,7 @@
 <script>
 /* ---------- CONFIG ---------- */
 const CFG = {
-  apiUrl: "https://script.google.com/macros/s/AKfycbxCfBRZBTfMYMx5LBhEQXGy1dVlSRzo-3gpVMPvkXDZRVBL8AtV5wdPuHIJSlXJD_aU/exec",   // <-- paste your /exec URL
+  apiUrl: "https://script.google.com/macros/s/AKfycbx7FO0BJl9BoXGwJ9jFuS1FM9WCWcr5N7KvENIc2A2v3TkF-c486xXsIPMEJDZSb5-Q/exec",   // <-- paste your /exec URL
   storeId:     getParam('store')  || 'CL-PTA-001',
   deviceLabel: getParam('device') || 'Front Counter',
   deviceId:    '',
@@ -225,6 +225,7 @@ async function onSubmit(){
   }
 
   const payload = {
+    token: 'CHANGE_ME_SUPER_SECRET',   // <--- MUST MATCH SHARED_TOKEN in Apps Script
     clientId: `${Date.now()}-${(crypto.getRandomValues(new Uint32Array(1))[0]).toString(16)}`,
     storeId: CFG.storeId, deviceLabel: CFG.deviceLabel, deviceId: CFG.deviceId || '',
     pressedAtUtc: new Date().toISOString(),
