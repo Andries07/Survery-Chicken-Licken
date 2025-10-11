@@ -9,26 +9,36 @@
 <style>
   /* Global reset to prevent overflow/overlap */
   *, *::before, *::after { box-sizing: border-box; }
+
   :root{
     --orange:#ff6900;
     --green:#16a34a; --green2:#22c55e; --yellow:#facc15; --orange2:#fb923c; --red:#dc2626;
     --veil: rgba(255,255,255,.94);
   }
+
   html,body{margin:0;height:100%;background:#000;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
   .hero{min-height:100dvh;background:url('./background.jpg') center/cover no-repeat fixed;display:grid;place-items:center}
   .veil{width:min(840px,96vw);background:var(--veil);border-radius:18px;box-shadow:0 16px 48px rgba(0,0,0,.35);padding:clamp(12px,2.8vw,20px)}
+
   .head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
   h1{font-size:clamp(20px,4.4vw,26px);line-height:1.08;margin:0;font-weight:900;color:#1a1a1a}
   .sub{color:#4a4a4a;font-weight:600;margin:2px 0 8px 0}
+
   .page{display:grid;grid-template-columns:1fr;gap:10px}
   .card{background:#fff;border-radius:14px;padding:10px;box-shadow:0 10px 24px rgba(0,0,0,.12);position:relative;overflow:hidden}
+
   .q{margin:6px 0}
   .q-title{font-weight:800;margin:0 0 6px;color:#191919;font-size:clamp(15px,3.2vw,17px)}
   .q-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
   @media (max-width:860px){ .q-grid{grid-template-columns:repeat(3,1fr)}}
   @media (max-width:540px){ .q-grid{grid-template-columns:repeat(2,1fr)}}
-  .opt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-       padding:9px; min-height:64px; text-align:center;border-radius:12px;color:#fff;font-weight:900;cursor:pointer;border:2px solid transparent;user-select:none; transition: outline-color .1s ease}
+
+  /* Emoji color buttons */
+  .opt{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    padding:9px; min-height:64px; text-align:center;border-radius:12px;color:#fff;font-weight:900;cursor:pointer;
+    border:2px solid transparent; user-select:none; transition: outline-color .1s ease;
+  }
   .opt input{display:none}
   .opt[data-score="5"]{background:var(--green)}
   .opt[data-score="4"]{background:var(--green2)}
@@ -36,22 +46,29 @@
   .opt[data-score="2"]{background:var(--orange2)}
   .opt[data-score="1"]{background:var(--red)}
   .opt:hover, .opt.active, .opt:focus-within { outline:3px solid #000; }
+
   .emo{font-size:clamp(18px,4.8vw,24px)}
   .lbl{font-size:clamp(11px,3.2vw,13px)}
+
+  /* Optional details layout */
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
   @media (max-width:680px){ .grid2{grid-template-columns:1fr} }
   input[type=text], textarea{width:100%;padding:10px;border:1.4px solid #ddd;border-radius:10px;font-size:16px;background:#fff}
   textarea{min-height:60px;resize:vertical}
   .popia{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:6px}
   .popia small{color:#444}
+
   .footerRow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px;flex-wrap:wrap}
   .btn{background:var(--orange); color:#fff; border:0; border-radius:12px; padding:11px 14px; font-weight:900; font-size:17px; cursor:pointer}
   .btn:disabled{opacity:.5;cursor:not-allowed}
   .muted{color:#5a5a5a;font-size:13px;min-height:18px}
+
+  /* Thank-you overlay */
   .thanks{position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.6); z-index:20}
   .thanks .in{background:#fff;padding:18px;border-radius:16px;text-align:center;width:min(420px,92vw);box-shadow:0 18px 54px rgba(0,0,0,.4)}
   .thanks h2{margin:0 0 6px}
   .mini{font-size:13px;color:#555}
+
   .tag{font-size:13px;font-weight:700;color:#222}
 </style>
 </head>
@@ -60,8 +77,12 @@
     <div class="veil">
       <div class="head"><h1>Quick Service Feedback</h1></div>
       <div class="sub">Please tap one answer per question.</div>
+
       <div class="page">
+        <!-- Questions -->
         <div class="card" id="qsCard"><div id="questions"></div></div>
+
+        <!-- Optional details + POPIA -->
         <div class="card" id="optionalCard">
           <h3 style="margin:0 0 6px">Optional details</h3>
           <div class="grid2">
@@ -78,6 +99,8 @@
           </label>
           <div class="muted" style="margin-top:2px">You don’t need to share personal details. If you do, ticking consent is required.</div>
         </div>
+
+        <!-- Actions -->
         <div class="footerRow">
           <div class="tag" id="storeTag"></div>
           <div style="display:flex;align-items:center;gap:8px">
@@ -88,6 +111,8 @@
       </div>
     </div>
   </div>
+
+  <!-- Thank-you -->
   <div class="thanks" id="thanks">
     <div class="in">
       <h2>Thank you!</h2>
@@ -95,12 +120,11 @@
       <button class="btn" id="againBtn">Done</button>
     </div>
   </div>
-<script>
-// (keep SW disabled during setup to avoid caching issues)
 
-// ---------- CONFIG ----------
+<script>
+/* ---------- CONFIG ---------- */
 const CFG = {
-  apiUrl: "https://script.google.com/macros/s/AKfycbwa6MMpn-oPma-BU_EgUB9Nq0MEg5PAGbf8rszOmuoNAtS-1BXXHtpJvUo0hnA_lfaK/exec", // <--- paste the /exec URL
+  apiUrl: "https://script.google.com/macros/s/AKfycbwa6MMpn-oPma-BU_EgUB9Nq0MEg5PAGbf8rszOmuoNAtS-1BXXHtpJvUo0hnA_lfaK/exec",   // <-- paste your /exec URL
   storeId:     getParam('store')  || 'CL-PTA-001',
   deviceLabel: getParam('device') || 'Front Counter',
   deviceId:    '',
@@ -108,7 +132,7 @@ const CFG = {
 };
 function getParam(k){ const u=new URL(location.href); return u.searchParams.get(k); }
 
-// ---------- QUESTIONS ----------
+/* ---------- QUESTIONS ---------- */
 const QUESTIONS = [
   { id:'Q1', text:'Speed of service' },
   { id:'Q2', text:'Friendliness of staff' },
@@ -124,7 +148,7 @@ const CHOICES = [
   { txt:'Bad',       score:1, emo:'😡', color:'var(--red)',    fg:'#fff' }
 ];
 
-// ---------- RENDER ----------
+/* ---------- RENDER ---------- */
 function renderQuestions(){
   const wrap = document.getElementById('questions');
   wrap.textContent = '';
@@ -159,7 +183,7 @@ function renderQuestions(){
   });
 }
 
-// ---------- VALIDATION ----------
+/* ---------- VALIDATION ---------- */
 function allAnswered(){ return QUESTIONS.every(q => !!document.querySelector(`input[name="${q.id}"]:checked`)); }
 function needsPOPIA(){
   return !!(document.getElementById('name').value.trim() ||
@@ -171,12 +195,13 @@ function updateSubmitState(){
   document.getElementById('submitBtn').disabled = !ok;
 }
 
-// ---------- SUBMIT (saves to Google Sheet) ----------
+/* ---------- SUBMIT (CORS-safe: no-cors) ---------- */
 async function onSubmit(){
   if(!allAnswered()){ toast('Please answer all questions'); return; }
   if(needsPOPIA() && !document.getElementById('popia').checked){
     toast('Please tick POPIA consent if you provide personal details'); return;
   }
+
   const answers = QUESTIONS.map(q=>{
     const score  = Number(document.querySelector(`input[name="${q.id}"]:checked`).value);
     const choice = CHOICES.find(c=>c.score===score);
@@ -184,7 +209,7 @@ async function onSubmit(){
   });
 
   const payload = {
-    clientId: `${Date.now()}-${(crypto.getRandomValues(new Uint32Array(1))[0]).toString(16)}`, // dedupe safety
+    clientId: `${Date.now()}-${(crypto.getRandomValues(new Uint32Array(1))[0]).toString(16)}`,
     storeId: CFG.storeId, deviceLabel: CFG.deviceLabel, deviceId: CFG.deviceId || '',
     pressedAtUtc: new Date().toISOString(),
     answers,
@@ -198,15 +223,15 @@ async function onSubmit(){
   };
 
   try{
-    const r = await fetch(CFG.apiUrl, {
+    await fetch(CFG.apiUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // no CORS preflight
-      body: JSON.stringify(payload)
+      mode: 'no-cors',                              // ← avoid CORS preflight/blocks
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+      keepalive: true
     });
-    const txt = await r.text();
-    if (!r.ok || !/\"ok\"\s*:\s*true/.test(txt)) throw new Error(txt);
 
-    // thank-you + reset for next customer
+    // In no-cors mode we can't read the response; assume success and reset UI
     document.getElementById('thanks').style.display='grid';
     setTimeout(()=>{
       document.getElementById('thanks').style.display='none';
@@ -215,14 +240,15 @@ async function onSubmit(){
       ['name','surname','phone','feedback'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('popia').checked=false;
       updateSubmitState();
-      toast(''); // clear
+      toast('');
     }, 1200);
   } catch (e) {
-    toast('Network/server error');
+    console.error(e);
+    toast('Network error');
   }
 }
 
-// ---------- Helpers ----------
+/* ---------- Helpers ---------- */
 function toast(msg){ const s=document.getElementById('statusTxt'); s.textContent=msg; clearTimeout(s._t); s._t=setTimeout(()=>s.textContent='',2500); }
 function init(){
   renderQuestions(); updateSubmitState();
@@ -233,6 +259,5 @@ function init(){
 }
 window.addEventListener('DOMContentLoaded', init);
 </script>
-
 </body>
 </html>
