@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chicken Licken • Feedback</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#000000">
+<style>
+  /* Global reset to prevent overflow/overlap */
+  *, *::before, *::after { box-sizing: border-box; }
+  :root{
+    --orange:#ff6900;
+    --green:#16a34a; --green2:#22c55e; --yellow:#facc15; --orange2:#fb923c; --red:#dc2626;
+    --veil: rgba(255,255,255,.94);
+  }
+  html,body{margin:0;height:100%;background:#000;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+  .hero{min-height:100dvh;background:url('./background.jpg') center/cover no-repeat fixed;display:grid;place-items:center}
+  .veil{width:min(840px,96vw);background:var(--veil);border-radius:18px;box-shadow:0 16px 48px rgba(0,0,0,.35);padding:clamp(12px,2.8vw,20px)}
+  .head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  h1{font-size:clamp(20px,4.4vw,26px);line-height:1.08;margin:0;font-weight:900;color:#1a1a1a}
+  .sub{color:#4a4a4a;font-weight:600;margin:2px 0 8px 0}
+  .page{display:grid;grid-template-columns:1fr;gap:10px}
+  .card{background:#fff;border-radius:14px;padding:10px;box-shadow:0 10px 24px rgba(0,0,0,.12);position:relative;overflow:hidden}
+  .q{margin:6px 0}
+  .q-title{font-weight:800;margin:0 0 6px;color:#191919;font-size:clamp(15px,3.2vw,17px)}
+  .q-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+  @media (max-width:860px){ .q-grid{grid-template-columns:repeat(3,1fr)}}
+  @media (max-width:540px){ .q-grid{grid-template-columns:repeat(2,1fr)}}
+  .opt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+       padding:9px; min-height:64px; text-align:center;border-radius:12px;color:#fff;font-weight:900;cursor:pointer;border:2px solid transparent;user-select:none; transition: outline-color .1s ease}
+  .opt input{display:none}
+  .opt[data-score="5"]{background:var(--green)}
+  .opt[data-score="4"]{background:var(--green2)}
+  .opt[data-score="3"]{background:var(--yellow); color:#111}
+  .opt[data-score="2"]{background:var(--orange2)}
+  .opt[data-score="1"]{background:var(--red)}
+  .opt:hover, .opt.active, .opt:focus-within { outline:3px solid #000; }
+  .emo{font-size:clamp(18px,4.8vw,24px)}
+  .lbl{font-size:clamp(11px,3.2vw,13px)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+  @media (max-width:680px){ .grid2{grid-template-columns:1fr} }
+  input[type=text], textarea{width:100%;padding:10px;border:1.4px solid #ddd;border-radius:10px;font-size:16px;background:#fff}
+  textarea{min-height:60px;resize:vertical}
+  .popia{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:6px}
+  .popia small{color:#444}
+  .footerRow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px;flex-wrap:wrap}
+  .btn{background:var(--orange); color:#fff; border:0; border-radius:12px; padding:11px 14px; font-weight:900; font-size:17px; cursor:pointer}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .muted{color:#5a5a5a;font-size:13px;min-height:18px}
+  .thanks{position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.6); z-index:20}
+  .thanks .in{background:#fff;padding:18px;border-radius:16px;text-align:center;width:min(420px,92vw);box-shadow:0 18px 54px rgba(0,0,0,.4)}
+  .thanks h2{margin:0 0 6px}
+  .mini{font-size:13px;color:#555}
+  .tag{font-size:13px;font-weight:700;color:#222}
+</style>
+</head>
+<body>
+  <div class="hero">
+    <div class="veil">
+      <div class="head"><h1>Quick Service Feedback</h1></div>
+      <div class="sub">Please tap one answer per question.</div>
+      <div class="page">
+        <div class="card" id="qsCard"><div id="questions"></div></div>
+        <div class="card" id="optionalCard">
+          <h3 style="margin:0 0 6px">Optional details</h3>
+          <div class="grid2">
+            <div><input id="name"    type="text" placeholder="Name (optional)"></div>
+            <div><input id="surname" type="text" placeholder="Surname (optional)"></div>
+          </div>
+          <div class="grid2" style="margin-top:8px">
+            <div><input id="phone" type="text" placeholder="Phone (optional)"></div>
+            <div><textarea id="feedback" placeholder="Additional feedback (optional)"></textarea></div>
+          </div>
+          <label class="popia" style="margin-top:6px">
+            <input id="popia" type="checkbox" style="margin-top:4px">
+            <small>I consent to the collection and processing of my personal information for customer service and quality feedback purposes, in accordance with the POPIA.</small>
+          </label>
+          <div class="muted" style="margin-top:2px">You don’t need to share personal details. If you do, ticking consent is required.</div>
+        </div>
+        <div class="footerRow">
+          <div class="tag" id="storeTag"></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="muted" id="statusTxt"></div>
+            <button class="btn" id="submitBtn" disabled>Submit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="thanks" id="thanks">
+    <div class="in">
+      <h2>Thank you!</h2>
+      <p class="mini">Your feedback has been recorded.</p>
+      <button class="btn" id="againBtn">Done</button>
+    </div>
+  </div>
+<script>
+// No service worker registration here to avoid caching issues during setup
+
+const CFG = {
+  storeId:     getParam('store')  || 'CL-STORE-001',
+  deviceLabel: getParam('device') || 'Front Counter',
+  deviceId:    '',
+  ALERT_WEBHOOK_URL: ''
+};
+function getParam(k){ const u=new URL(location.href); return u.searchParams.get(k); }
+
+const QUESTIONS = [
+  { id:'Q1', text:'Speed of service' },
+  { id:'Q2', text:'Friendliness of staff' },
+  { id:'Q3', text:'Order accuracy' },
+  { id:'Q4', text:'Cleanliness of store' },
+  { id:'Q5', text:'Overall experience' }
+];
+const CHOICES = [
+  { txt:'Excellent', score:5, emo:'😄', color:'var(--green)',  fg:'#fff' },
+  { txt:'Good',      score:4, emo:'🙂', color:'var(--green2)', fg:'#fff' },
+  { txt:'Average',   score:3, emo:'😐', color:'var(--yellow)', fg:'#111' },
+  { txt:'Poor',      score:2, emo:'🙁', color:'var(--orange2)',fg:'#fff' },
+  { txt:'Bad',       score:1, emo:'😡', color:'var(--red)',    fg:'#fff' }
+];
+
+function renderQuestions(){
+  const wrap = document.getElementById('questions');
+  wrap.textContent = '';
+  QUESTIONS.forEach(q=>{
+    const holder = document.createElement('div');
+    holder.className = 'q';
+    const title = document.createElement('div');
+    title.className = 'q-title';
+    title.textContent = q.text;
+    const row = document.createElement('div');
+    row.className = 'q-grid';
+    row.dataset.qid = q.id;
+
+    CHOICES.forEach(c=>{
+      const lab = document.createElement('label');
+      lab.className = 'opt';
+      lab.dataset.score = String(c.score);
+      lab.style.background = c.color;
+      lab.style.color = c.fg;
+
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = q.id;
+      input.value = String(c.score);
+
+      const emo = document.createElement('div');
+      emo.className = 'emo';
+      emo.textContent = c.emo;
+
+      const lbl = document.createElement('div');
+      lbl.className = 'lbl';
+      lbl.textContent = c.txt;
+
+      lab.appendChild(input);
+      lab.appendChild(emo);
+      lab.appendChild(lbl);
+      row.appendChild(lab);
+    });
+
+    holder.appendChild(title);
+    holder.appendChild(row);
+    wrap.appendChild(holder);
+  });
+
+  wrap.querySelectorAll('.q-grid').forEach(grid=>{
+    grid.addEventListener('click', (e)=>{
+      const lab = e.target.closest('.opt'); if(!lab) return;
+      grid.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
+      lab.classList.add('active');
+      const inp = lab.querySelector('input'); if (inp) inp.checked = true;
+      updateSubmitState();
+    });
+  });
+}
+
+function allAnswered(){ return QUESTIONS.every(q => !!document.querySelector(`input[name="${q.id}"]:checked`)); }
+function needsPOPIA(){
+  return !!(document.getElementById('name').value.trim() ||
+            document.getElementById('surname').value.trim() ||
+            document.getElementById('phone').value.trim());
+}
+function updateSubmitState(){
+  const ok = allAnswered() && (!needsPOPIA() || document.getElementById('popia').checked);
+  document.getElementById('submitBtn').disabled = !ok;
+}
+
+function onSubmit(){
+  if(!allAnswered()){ toast('Please answer all questions'); return; }
+  if(needsPOPIA() && !document.getElementById('popia').checked){
+    toast('Please tick POPIA consent if you provide personal details'); return;
+  }
+  document.getElementById('thanks').style.display='grid';
+  setTimeout(()=>{
+    document.getElementById('thanks').style.display='none';
+    document.querySelectorAll('input[type=radio]').forEach(i=>i.checked=false);
+    document.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
+    ['name','surname','phone','feedback'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('popia').checked=false;
+    updateSubmitState();
+  }, 1600);
+}
+function toast(msg){
+  const s = document.getElementById('statusTxt');
+  s.textContent = msg; clearTimeout(s._t); s._t = setTimeout(()=> s.textContent='', 2200);
+}
+function init(){
+  renderQuestions(); updateSubmitState();
+  document.addEventListener('input', e=>{ if(['name','surname','phone','feedback','popia'].includes(e.target.id)) updateSubmitState(); });
+  document.getElementById('submitBtn').addEventListener('click', onSubmit);
+  document.getElementById('againBtn').addEventListener('click', ()=>{ document.getElementById('thanks').style.display='none'; });
+  document.getElementById('storeTag').textContent = `${CFG.storeId} • ${CFG.deviceLabel}`;
+}
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
