@@ -225,7 +225,7 @@ async function onSubmit(){
   }
 
   const payload = {
-    token: 'CHANGE_ME_SUPER_SECRET',   // <--- MUST MATCH SHARED_TOKEN in Apps Script
+    //token: 'CHANGE_ME_SUPER_SECRET',   // <--- MUST MATCH SHARED_TOKEN in Apps Script
     clientId: `${Date.now()}-${(crypto.getRandomValues(new Uint32Array(1))[0]).toString(16)}`,
     storeId: CFG.storeId, deviceLabel: CFG.deviceLabel, deviceId: CFG.deviceId || '',
     pressedAtUtc: new Date().toISOString(),
