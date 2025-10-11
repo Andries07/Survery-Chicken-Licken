@@ -54,6 +54,7 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
   @media (max-width:680px){ .grid2{grid-template-columns:1fr} }
   input[type=text], textarea{width:100%;padding:10px;border:1.4px solid #ddd;border-radius:10px;font-size:16px;background:#fff}
+  input[type=text]{autocomplete:off}
   textarea{min-height:60px;resize:vertical}
   .popia{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:6px}
   .popia small{color:#444}
@@ -86,12 +87,12 @@
         <div class="card" id="optionalCard">
           <h3 style="margin:0 0 6px">Optional details</h3>
           <div class="grid2">
-            <div><input id="name"    type="text" placeholder="Name (optional)"></div>
-            <div><input id="surname" type="text" placeholder="Surname (optional)"></div>
+            <div><input id="name"    type="text" placeholder="Name (optional)" autocomplete="off"></div>
+            <div><input id="surname" type="text" placeholder="Surname (optional)" autocomplete="off"></div>
           </div>
           <div class="grid2" style="margin-top:8px">
-            <div><input id="phone" type="text" placeholder="Phone (optional)"></div>
-            <div><textarea id="feedback" placeholder="Additional feedback (optional)"></textarea></div>
+            <div><input id="phone" type="text" placeholder="Phone (optional)" autocomplete="off"></div>
+            <div><textarea id="feedback" placeholder="Additional feedback (optional)" autocomplete="off"></textarea></div>
           </div>
           <label class="popia" style="margin-top:6px">
             <input id="popia" type="checkbox" style="margin-top:4px">
@@ -184,7 +185,13 @@ function renderQuestions(){
 }
 
 /* ---------- VALIDATION ---------- */
-function allAnswered(){ return QUESTIONS.every(q => !!document.querySelector(`input[name="${q.id}"]:checked`)); }
+function allAnswered(){
+  // robust: prefer .opt.active (UI state), fall back to :checked
+  return QUESTIONS.every(q => {
+    const grid = document.querySelector(`.q-grid[data-qid="${q.id}"]`);
+    return !!(grid && (grid.querySelector('.opt.active') || document.querySelector(`input[name="${q.id}"]:checked`)));
+  });
+}
 function needsPOPIA(){
   return !!(document.getElementById('name').value.trim() ||
             document.getElementById('surname').value.trim() ||
@@ -202,11 +209,20 @@ async function onSubmit(){
     toast('Please tick POPIA consent if you provide personal details'); return;
   }
 
+  // Build answers using .opt.active (fallback to :checked)
   const answers = QUESTIONS.map(q=>{
-    const score  = Number(document.querySelector(`input[name="${q.id}"]:checked`).value);
-    const choice = CHOICES.find(c=>c.score===score);
-    return { questionId:q.id, choiceText:choice.txt, choiceScore:score };
+    const grid  = document.querySelector(`.q-grid[data-qid="${q.id}"]`);
+    const active = grid ? grid.querySelector('.opt.active') : null;
+    let score = active ? Number(active.dataset.score) : Number((document.querySelector(`input[name="${q.id}"]:checked`)||{}).value || 0);
+    const choice = CHOICES.find(c=>c.score===score) || CHOICES[0];
+    return { questionId:q.id, choiceText:choice.txt, choiceScore:choice.score };
   });
+
+  // Defensive: if something is wrong, stop and tell us before POST
+  if (answers.filter(a => a.choiceScore>0).length !== QUESTIONS.length) {
+    toast('Debug: answers not captured – refresh and try again');
+    return;
+  }
 
   const payload = {
     clientId: `${Date.now()}-${(crypto.getRandomValues(new Uint32Array(1))[0]).toString(16)}`,
