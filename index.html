@@ -8,44 +8,44 @@
   /* Reset & sizing */
   *,*::before,*::after{box-sizing:border-box}
   :root{
-    --card:#fff; --text:#111;
+    --card-rgba: rgba(255,255,255,0.78); /* card transparency */
+    --field-rgba: rgba(255,255,255,0.9); /* input/textarea bg */
+    --text:#111;
     --cl:#ff6900; --green:#16a34a; --green2:#22c55e; --yellow:#facc15; --orange:#fb923c; --red:#dc2626;
   }
   html,body{margin:0;height:100%;font-family:Arial,sans-serif;background:#000}
 
-  /* Funky repeating background matrix */
+  /* Repeating logo matrix background */
   .hero{
     min-height:100dvh;
-    background-image:url('./background.jpg');   /* your logo file */
-    background-repeat:repeat;                   /* tile it */
-    background-size:160px auto;                 /* adjust tile size if you like */
+    background-image:url('./background.jpg');
+    background-repeat:repeat;
+    background-size:160px auto;      /* adjust tile size if you want */
     background-position:top left;
-    display:grid;place-items:start center;      /* align content at the top, centered */
-    padding:14px 2vw 24px;                      /* page padding so content doesn't touch edges */
+    display:grid;place-items:start center;
+    padding:14px 2vw 24px;
   }
 
-  /* Transparent outer wrapper so the tiled bg shows through */
-  .wrap{
-    width:min(860px,96vw);
-    background:transparent;                     /* <-- key change: no white veil */
-  }
+  /* Transparent wrapper so background shows through */
+  .wrap{width:min(860px,96vw);background:transparent}
 
   h1{
-    margin:0 0 10px;text-align:center;color:#fff;font-weight:900;
-    text-shadow:0 2px 8px rgba(0,0,0,.45);      /* readable on busy background */
+    margin:0 0 10px;text-align:center;color:#ffffff;
+    font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.55);
   }
 
   .grid{display:grid;gap:10px}
 
-  /* Individual cards remain solid white */
+  /* Semi-transparent cards */
   .card{
-    background:var(--card);
+    background:var(--card-rgba);
     border-radius:14px;
     padding:12px;
     box-shadow:0 10px 24px rgba(0,0,0,.22);
+    backdrop-filter:saturate(120%) blur(2px);
   }
 
-  .q-title{font-weight:800;margin-bottom:8px;color:#111}
+  .q-title{font-weight:800;margin-bottom:8px;color:var(--text)}
 
   /* Buttons row: ALWAYS 5 in one line, responsive */
   .q-row{
@@ -70,13 +70,21 @@
   /* Optional details */
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   @media (max-width:640px){.grid2{grid-template-columns:1fr}}
-  input,textarea{width:100%;padding:10px;border:1.4px solid #ddd;border-radius:10px;font-size:15px;min-width:0;background:#fff}
+  input,textarea{
+    width:100%;padding:10px;border:1.4px solid #ddd;border-radius:10px;font-size:15px;min-width:0;
+    background:var(--field-rgba);
+  }
   textarea{min-height:64px;resize:vertical}
 
   .row-end{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:6px}
-  .btn{background:var(--cl);color:#fff;border:0;border-radius:12px;padding:12px 16px;font-weight:900;font-size:17px;cursor:pointer}
+  .btn{
+    background:#000;            /* BLACK submit button */
+    color:#fff;border:0;border-radius:12px;padding:12px 16px;font-weight:900;font-size:17px;cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,.25);
+  }
+  .btn:hover{filter:brightness(0.92)}
   .btn:disabled{opacity:.6;cursor:not-allowed}
-  .muted{color:#eee;font-size:13px;min-height:18px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+  .muted{color:#ffffff;opacity:.9;font-size:13px;min-height:18px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 
   /* Thanks overlay */
   .thanks{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);place-items:center;z-index:20}
@@ -88,15 +96,15 @@
     <div class="wrap">
       <h1>Chicken Licken Quick Feedback</h1>
 
-      <!-- Questions container: each question is its own solid card -->
+      <!-- Questions container: each question is its own semi-transparent card -->
       <div id="qList" class="grid"></div>
 
       <!-- Spacer between questions and optional details -->
       <div style="height:10px"></div>
 
-      <!-- Optional details (solid white card) -->
+      <!-- Optional details (semi-transparent card) -->
       <div class="card">
-        <h3 style="margin:0 0 6px">Optional details</h3>
+        <h3 style="margin:0 0 6px;color:#111">Optional details</h3>
         <div class="grid2">
           <div><input id="name" placeholder="Name (optional)" autocomplete="off"></div>
           <div><input id="surname" placeholder="Surname (optional)" autocomplete="off"></div>
@@ -114,7 +122,7 @@
         </label>
       </div>
 
-      <!-- Footer (text kept readable via light color + text-shadow) -->
+      <!-- Footer on top of background (readable via light text + shadow) -->
       <div class="row-end">
         <div class="muted" id="storeTag"></div>
         <div style="display:flex;align-items:center;gap:8px">
@@ -244,7 +252,7 @@ document.getElementById('submitBtn').addEventListener('click', async ()=>{
   try{
     await fetch(CFG.apiUrl, {
       method: 'POST',
-      mode: 'no-cors', // avoids CORS blocks; server still receives body
+      mode: 'no-cors', /* avoids CORS blocks; server still receives body */
       headers: { 'Content-Type':'text/plain;charset=utf-8' },
       body: JSON.stringify(payload),
       keepalive: true
