@@ -13,14 +13,24 @@
     --cl:#ff6900; --green:#16a34a; --green2:#22c55e; --yellow:#facc15; --orange:#fb923c; --red:#dc2626;
   }
   html,body{margin:0;height:100%;font-family:Arial,sans-serif;background:#000}
-  .hero{min-height:100dvh;background:url('./background.jpg') center/cover no-repeat fixed;display:grid;place-items:center}
+
+  /* Funky repeating background matrix */
+  .hero{
+    min-height:100dvh;
+    background-image:url('./background.jpg');
+    background-repeat:repeat;           /* tile the logo */
+    background-size: 160px auto;        /* adjust tile size if you want bigger/smaller */
+    background-position: top left;
+    display:grid;place-items:center
+  }
+
   .wrap{width:min(860px,96vw);background:var(--bgveil);padding:14px;border-radius:18px;box-shadow:0 16px 48px rgba(0,0,0,.35)}
   h1{margin:0 0 8px;text-align:center;color:#111;font-weight:900}
   .grid{display:grid;gap:10px}
   .card{background:var(--card);border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.12)}
   .q-title{font-weight:800;margin-bottom:8px;color:#111}
 
-  /* Buttons row: ALWAYS 5 in one line, shrink to fit */
+  /* Buttons row: ALWAYS 5 in one line, responsive */
   .q-row{
     display:grid;
     grid-template-columns:repeat(5,1fr);
@@ -62,6 +72,9 @@
 
       <!-- Questions container -->
       <div id="qList" class="grid"></div>
+
+      <!-- Add a little space before Optional Details -->
+      <div style="height:8px"></div>
 
       <!-- Optional details -->
       <div class="card">
@@ -106,9 +119,10 @@
 <script>
 /* ===== CONFIG ===== */
 const CFG = {
-  apiUrl: "https://script.google.com/macros/s/AKfycbzcj4QKKW_gMqpbsjux4fmipgE-o5Axlbn3okJV8102pzRwCurffXG5BEhPB9wz9tp9/exec",            // <-- paste new /exec URL
-  token:  "CHANGE_ME_SUPER_SECRET2",               // <-- must match SHARED_TOKEN
-  storeId: getParam('store') || 'CL-PTA-001',
+  apiUrl: "https://script.google.com/macros/s/AKfycbywg6GgKnspCdDRFyflkHE__cVATDLHArLOdSDxi1rp5GZrW6EHrZVPK3MHaJcqYICs/exec",            // <-- paste new /exec URL
+  token:  "CHANGE_ME_SUPER_SECRET2",               // <-- must match Apps Script
+  // CHANGED: default store id
+  storeId: getParam('store') || 'CL-Witbank-Highveld',
   deviceLabel: getParam('device') || 'Front Counter'
 };
 function getParam(k){ const u=new URL(location.href); return u.searchParams.get(k); }
