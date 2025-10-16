@@ -5,163 +5,235 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Chicken Licken Feedback v2</title>
 <style>
+  /* Reset & sizing */
+  *,*::before,*::after{box-sizing:border-box}
   :root{
-    --green:#16a34a;--green2:#22c55e;--yellow:#facc15;
-    --orange:#fb923c;--red:#dc2626;--orangeCL:#ff6900;
+    --bgveil: rgba(255,255,255,.94);
+    --card:#fff; --text:#111;
+    --cl:#ff6900; --green:#16a34a; --green2:#22c55e; --yellow:#facc15; --orange:#fb923c; --red:#dc2626;
   }
-  body{margin:0;font-family:Arial,sans-serif;background:url('./background.jpg')center/cover no-repeat fixed;}
-  .container{background:rgba(255,255,255,.94);max-width:820px;margin:2%auto;padding:18px;border-radius:18px;}
-  h1{color:#1a1a1a;margin:0 0 10px;font-weight:900;text-align:center;}
-  .question{margin:10px 0;}
-  .q-title{font-weight:700;margin-bottom:8px;}
-  .q-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:space-between;}
+  html,body{margin:0;height:100%;font-family:Arial,sans-serif;background:#000}
+  .hero{min-height:100dvh;background:url('./background.jpg') center/cover no-repeat fixed;display:grid;place-items:center}
+  .wrap{width:min(860px,96vw);background:var(--bgveil);padding:14px;border-radius:18px;box-shadow:0 16px 48px rgba(0,0,0,.35)}
+  h1{margin:0 0 8px;text-align:center;color:#111;font-weight:900}
+  .grid{display:grid;gap:10px}
+  .card{background:var(--card);border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.12)}
+  .q-title{font-weight:800;margin-bottom:8px;color:#111}
+
+  /* Buttons row: ALWAYS 5 in one line, shrink to fit */
+  .q-row{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:8px;
+  }
   .opt{
-    flex:1 1 18%;min-width:110px;
-    text-align:center;padding:10px;border-radius:12px;
-    color:#fff;font-weight:700;cursor:pointer;user-select:none;
-    border:2px solid transparent;transition:.1s;
+    display:grid;place-items:center;gap:4px;
+    padding:10px;min-height:64px;border-radius:12px;color:#fff;font-weight:800;cursor:pointer;
+    border:2px solid transparent; user-select:none;
   }
-  .opt.active{border:3px solid #000;}
-  .opt[data-score="5"]{background:var(--green);}
-  .opt[data-score="4"]{background:var(--green2);}
-  .opt[data-score="3"]{background:var(--yellow);color:#000;}
-  .opt[data-score="2"]{background:var(--orange);}
-  .opt[data-score="1"]{background:var(--red);}
-  input,textarea{width:100%;padding:9px;border-radius:10px;border:1.4px solid #ddd;font-size:15px;}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  @media(max-width:680px){.grid2{grid-template-columns:1fr}}
-  .btn{background:var(--orangeCL);color:#fff;border:0;padding:12px 16px;border-radius:12px;font-weight:900;font-size:17px;cursor:pointer;}
-  .btn:disabled{opacity:.6;cursor:not-allowed;}
-  small{color:#555;}
-  .thanks{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);place-items:center;}
-  .thanks .in{background:#fff;padding:22px;border-radius:16px;text-align:center;width:min(420px,90vw);}
+  .opt.active{outline:3px solid #000}
+  .opt[data-score="5"]{background:var(--green)}
+  .opt[data-score="4"]{background:var(--green2)}
+  .opt[data-score="3"]{background:var(--yellow);color:#111}
+  .opt[data-score="2"]{background:var(--orange)}
+  .opt[data-score="1"]{background:var(--red)}
+  .emo{font-size:22px}
+  .lbl{font-size:13px}
+
+  /* Optional details */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  @media (max-width:640px){.grid2{grid-template-columns:1fr}}
+  input,textarea{width:100%;padding:10px;border:1.4px solid #ddd;border-radius:10px;font-size:15px;min-width:0;background:#fff}
+  textarea{min-height:64px;resize:vertical}
+  .row-end{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .btn{background:var(--cl);color:#fff;border:0;border-radius:12px;padding:12px 16px;font-weight:900;font-size:17px;cursor:pointer}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .muted{color:#666;font-size:13px;min-height:18px}
+
+  /* Thanks overlay */
+  .thanks{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);place-items:center;z-index:20}
+  .thanks .in{background:#fff;padding:22px;border-radius:16px;text-align:center;width:min(420px,92vw);box-shadow:0 18px 54px rgba(0,0,0,.4)}
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>Chicken Licken Quick Feedback</h1>
-  <div id="questions"></div>
+  <div class="hero">
+    <div class="wrap">
+      <h1>Chicken Licken Quick Feedback</h1>
 
-  <h3>Optional Details</h3>
-  <div class="grid2">
-    <div><input id="name" placeholder="Name (optional)"></div>
-    <div><input id="surname" placeholder="Surname (optional)"></div>
-  </div>
-  <div class="grid2" style="margin-top:8px;">
-    <div><input id="phone" placeholder="Phone (optional, 10 digits)" maxlength="10"></div>
-    <div><input id="email" placeholder="Email (optional)"></div>
-  </div>
-  <textarea id="feedback" placeholder="Additional feedback (optional)" style="margin-top:8px;"></textarea>
-  <label style="display:flex;align-items:start;gap:8px;margin-top:8px;">
-    <input type="checkbox" id="popia" style="margin-top:4px;">
-    <small>I consent to the collection and processing of my personal information for customer service and quality feedback purposes in accordance with the POPIA.</small>
-  </label>
-  <div style="text-align:right;margin-top:10px;">
-    <button class="btn" id="submitBtn" disabled>Submit</button>
-  </div>
-</div>
+      <!-- Questions container -->
+      <div id="qList" class="grid"></div>
 
-<div class="thanks" id="thanks">
-  <div class="in">
-    <h2>Thank you!</h2>
-    <p>Your feedback has been recorded.</p>
-    <button class="btn" id="doneBtn">Done</button>
+      <!-- Optional details -->
+      <div class="card">
+        <h3 style="margin:0 0 6px">Optional details</h3>
+        <div class="grid2">
+          <div><input id="name" placeholder="Name (optional)" autocomplete="off"></div>
+          <div><input id="surname" placeholder="Surname (optional)" autocomplete="off"></div>
+        </div>
+        <div class="grid2" style="margin-top:8px">
+          <div><input id="phone" placeholder="Phone (optional, 10 digits)" maxlength="10" autocomplete="off"></div>
+          <div><input id="email" placeholder="Email (optional)" autocomplete="off"></div>
+        </div>
+        <div style="margin-top:8px">
+          <textarea id="feedback" placeholder="Additional feedback (optional)" autocomplete="off"></textarea>
+        </div>
+        <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:8px">
+          <input type="checkbox" id="popia" style="margin-top:4px">
+          <small>I consent to the collection and processing of my personal information for customer service and quality feedback purposes, in accordance with the POPIA.</small>
+        </label>
+      </div>
+
+      <!-- Footer -->
+      <div class="row-end" style="margin-top:6px">
+        <div class="muted" id="storeTag"></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="muted" id="statusTxt"></div>
+          <button class="btn" id="submitBtn" disabled>Submit</button>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+
+  <!-- Thank-you -->
+  <div class="thanks" id="thanks">
+    <div class="in">
+      <h2>Thank you!</h2>
+      <p>Your feedback has been recorded.</p>
+      <button class="btn" id="againBtn">Done</button>
+    </div>
+  </div>
 
 <script>
-const CFG={apiUrl:"https://script.google.com/macros/s/AKfycbwybDfo0ncc1Wf0EG1ryyUi1sSXkteVSr7botwW8kr3zIp-4r14wV8sODmSgLFgRDEz/exec",token:"CHANGE_ME_SUPER_SECRET",
-storeId:getParam("store")||"CL-Witbank-Highveld",deviceLabel:getParam("device")||"Front Counter"};
-function getParam(k){const u=new URL(location.href);return u.searchParams.get(k);}
-const QUESTIONS=[
-{id:"Q1",text:"Speed of service"},
-{id:"Q2",text:"Friendliness of staff"},
-{id:"Q3",text:"Order accuracy"},
-{id:"Q4",text:"Cleanliness of store"},
-{id:"Q5",text:"Overall experience"}
+/* ===== CONFIG ===== */
+const CFG = {
+  apiUrl: "https://script.google.com/macros/s/AKfycbym_e9oJn5yu1zzawTKX6yAh0JUb1AZU0Dzv-R08omGlrVqVKlediwjiR2d6Aww4HGW/exec",            // <-- paste new /exec URL
+  token:  "CHANGE_ME_SUPER_SECRET",               // <-- must match SHARED_TOKEN
+  storeId: getParam('store') || 'CL-PTA-001',
+  deviceLabel: getParam('device') || 'Front Counter'
+};
+function getParam(k){ const u=new URL(location.href); return u.searchParams.get(k); }
+
+/* ===== QUESTIONS ===== */
+const QUESTIONS = [
+  { id:'Q1', text:'Speed of service' },
+  { id:'Q2', text:'Friendliness of staff' },
+  { id:'Q3', text:'Order accuracy' },
+  { id:'Q4', text:'Cleanliness of store' },
+  { id:'Q5', text:'Overall experience' }
 ];
-const CHOICES=[
-{txt:"Excellent",score:5,emo:"😄"},
-{txt:"Good",score:4,emo:"🙂"},
-{txt:"Average",score:3,emo:"😐"},
-{txt:"Poor",score:2,emo:"🙁"},
-{txt:"Bad",score:1,emo:"😡"}
+const CHOICES = [
+  { txt:'Excellent', score:5, emo:'😄' },
+  { txt:'Good',      score:4, emo:'🙂' },
+  { txt:'Average',   score:3, emo:'😐' },
+  { txt:'Poor',      score:2, emo:'🙁' },
+  { txt:'Bad',       score:1, emo:'😡' }
 ];
 
-// --- Render questions ---
+/* ===== RENDER ===== */
+function makeQuestion(q){
+  const card = document.createElement('div'); card.className='card';
+  const title = document.createElement('div'); title.className='q-title'; title.textContent=q.text;
+  const row = document.createElement('div'); row.className='q-row'; row.dataset.qid=q.id;
+
+  CHOICES.forEach(c=>{
+    const d = document.createElement('div');
+    d.className='opt'; d.dataset.score=c.score;
+    d.innerHTML = `<div class="emo">${c.emo}</div><div class="lbl">${c.txt}</div>`;
+    d.addEventListener('click', ()=>{
+      row.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
+      d.classList.add('active'); updateSubmitState();
+    });
+    row.appendChild(d);
+  });
+
+  card.appendChild(title); card.appendChild(row);
+  return card;
+}
+
 function render(){
- const wrap=document.getElementById("questions");
- wrap.innerHTML="";
- QUESTIONS.forEach(q=>{
-   const div=document.createElement("div");div.className="question";
-   const title=document.createElement("div");title.className="q-title";title.textContent=q.text;
-   const row=document.createElement("div");row.className="q-row";row.dataset.qid=q.id;
-   CHOICES.forEach(c=>{
-     const o=document.createElement("div");o.className="opt";o.dataset.score=c.score;
-     o.innerHTML=`<div style='font-size:24px;'>${c.emo}</div><div>${c.txt}</div>`;
-     o.onclick=()=>{row.querySelectorAll(".opt").forEach(x=>x.classList.remove("active"));o.classList.add("active");updateState();};
-     row.appendChild(o);
-   });
-   div.appendChild(title);div.appendChild(row);wrap.appendChild(div);
- });
+  const list = document.getElementById('qList');
+  list.innerHTML = '';
+  QUESTIONS.forEach(q => list.appendChild(makeQuestion(q)));
+  document.getElementById('storeTag').textContent = `${CFG.storeId} • ${CFG.deviceLabel}`;
 }
 render();
 
-function allAnswered(){return QUESTIONS.every(q=>document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`));}
+/* ===== VALIDATION ===== */
+function allAnswered(){
+  return QUESTIONS.every(q => document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`));
+}
 function needsPOPIA(){
-  const n=val("name")||val("surname")||val("phone")||val("email");
-  return !!n;
+  return !!(val('name') || val('surname') || val('phone') || val('email'));
 }
-function val(id){return document.getElementById(id).value.trim();}
-function updateState(){
-  const ok=allAnswered() && (!needsPOPIA()||document.getElementById("popia").checked);
-  document.getElementById("submitBtn").disabled=!ok;
+function val(id){ return (document.getElementById(id).value || '').trim(); }
+
+function updateSubmitState(){
+  let ok = allAnswered();
+  if (needsPOPIA() && !document.getElementById('popia').checked) ok = false;
+
+  // phone: 10 digits if provided
+  const ph = val('phone');
+  if (ph && !/^\d{10}$/.test(ph)) ok = false;
+
+  // email: must contain @ and .
+  const em = val('email');
+  if (em && !/.+@.+\..+/.test(em)) ok = false;
+
+  document.getElementById('submitBtn').disabled = !ok;
 }
+document.addEventListener('input', updateSubmitState);
 
-document.addEventListener("input",updateState);
+/* ===== SUBMIT ===== */
+document.getElementById('submitBtn').addEventListener('click', async ()=>{
+  if (!allAnswered()) { toast('Please answer all questions'); return; }
+  if (needsPOPIA() && !document.getElementById('popia').checked){ toast('Tick POPIA consent when providing personal details'); return; }
+  const ph = val('phone'); if (ph && !/^\d{10}$/.test(ph)) { toast('Enter a valid 10-digit phone'); return; }
+  const em = val('email'); if (em && !/.+@.+\..+/.test(em)) { toast('Enter a valid email'); return; }
 
-document.getElementById("submitBtn").onclick=async()=>{
-  if(!allAnswered()){alert("Please answer all questions.");return;}
-  if(needsPOPIA()&&!document.getElementById("popia").checked){alert("Tick POPIA consent if you provide personal details.");return;}
-
-  const phone=val("phone");
-  if(phone && (!/^\d{10}$/.test(phone))){alert("Please enter a valid 10-digit phone number.");return;}
-
-  const email=val("email");
-  if(email && (!/.+@.+\..+/.test(email))){alert("Please enter a valid email address.");return;}
-
-  const answers=QUESTIONS.map(q=>{
-    const a=document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`);
-    const score=Number(a.dataset.score);
-    const choice=CHOICES.find(c=>c.score===score);
-    return{questionId:q.text,choiceText:choice.txt,choiceScore:score};
+  const answers = QUESTIONS.map(q=>{
+    const el = document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`);
+    const score = Number(el.dataset.score);
+    const ch = CHOICES.find(c=>c.score===score);
+    return { questionId: q.text, choiceText: ch.txt, choiceScore: score };
   });
 
-  const payload={
-    token:CFG.token,clientId:`${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    storeId:CFG.storeId,deviceLabel:CFG.deviceLabel,deviceId:"",
-    pressedAtUtc:new Date().toISOString(),answers,
-    customer:{
-      name:val("name"),surname:val("surname"),phone,email,
-      feedback:val("feedback"),consent:document.getElementById("popia").checked||null
+  const payload = {
+    token: CFG.token,
+    clientId: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    storeId: CFG.storeId, deviceLabel: CFG.deviceLabel, deviceId: '',
+    pressedAtUtc: new Date().toISOString(),
+    answers,
+    customer: {
+      name: val('name'), surname: val('surname'), phone: val('phone'),
+      email: val('email'), feedback: val('feedback'),
+      consent: document.getElementById('popia').checked || null
     }
   };
 
   try{
-    await fetch(CFG.apiUrl,{method:"POST",mode:"no-cors",
-      headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body:JSON.stringify(payload),keepalive:true});
-    document.getElementById("thanks").style.display="grid";
-  }catch(e){alert("Network error.");}
-};
+    await fetch(CFG.apiUrl, {
+      method: 'POST',
+      mode: 'no-cors', // avoids CORS blocks; server still receives body
+      headers: { 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+      keepalive: true
+    });
+    showThanks();
+  }catch(err){ console.error(err); toast('Network error'); }
+});
 
-document.getElementById("doneBtn").onclick=()=>{
-  document.getElementById("thanks").style.display="none";
-  document.querySelectorAll(".opt").forEach(o=>o.classList.remove("active"));
-  ["name","surname","phone","email","feedback"].forEach(id=>document.getElementById(id).value="");
-  document.getElementById("popia").checked=false;
-  updateState();
-};
+function showThanks(){
+  const t = document.getElementById('thanks'); t.style.display='grid';
+}
+document.getElementById('againBtn').addEventListener('click', ()=>{
+  document.getElementById('thanks').style.display='none';
+  document.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
+  ['name','surname','phone','email','feedback'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('popia').checked = false;
+  updateSubmitState();
+});
+
+function toast(msg){ const s=document.getElementById('statusTxt'); if(!s) return; s.textContent=msg; clearTimeout(s._t); s._t=setTimeout(()=>s.textContent='',2500); }
 </script>
 </body>
 </html>
