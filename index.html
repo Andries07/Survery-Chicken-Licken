@@ -2,8 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Chicken Licken Feedback v2</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Chicken Licken Feedback</title>
+
+<!-- PWA / iPad full screen setup -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CL Feedback">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png">
+
 <style>
   *,*::before,*::after{box-sizing:border-box}
   :root{
@@ -24,11 +33,10 @@
   }
   .wrap{width:min(860px,96vw);background:transparent}
 
-  /* Title back to white */
   h1{
     margin:0 0 10px;
     text-align:center;
-    color:#fff;                /* WHITE again */
+    color:#fff;
     font-weight:900;
     font-size:28px;
     text-shadow:0 2px 8px rgba(0,0,0,.55);
@@ -37,18 +45,15 @@
   .grid{display:grid;gap:10px}
   .card{background:var(--card-rgba);border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.22);backdrop-filter:saturate(120%) blur(2px)}
 
-  /* Question titles a bit smaller */
   .q-title{
     font-weight:900;
-    font-size:20px;            /* was 22px */
+    font-size:20px;
     line-height:1.25;
     margin-bottom:10px;
     color:var(--text);
     letter-spacing:.2px;
   }
-  @media (max-width:640px){
-    .q-title{font-size:18px;}  /* was 20px */
-  }
+  @media (max-width:640px){.q-title{font-size:18px;}}
 
   .q-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
   .opt{display:grid;place-items:center;gap:4px;padding:10px;min-height:64px;border-radius:12px;color:#fff;font-weight:800;cursor:pointer;border:2px solid transparent;user-select:none}
@@ -75,173 +80,152 @@
 </style>
 </head>
 <body>
-  <!-- Clear any old caches/service workers -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
-    }
-    if ('caches' in window) {
-      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-    }
-  </script>
+<script>
+  if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()));}
+  if('caches' in window){caches.keys().then(k=>k.forEach(c=>caches.delete(c)));}
+</script>
 
-  <div class="hero">
-    <div class="wrap">
-      <h1>Chicken Licken Quick Feedback</h1>
+<div class="hero">
+  <div class="wrap">
+    <h1>Chicken Licken Quick Feedback</h1>
+    <div id="qList" class="grid"></div>
+    <div style="height:10px"></div>
 
-      <!-- Questions -->
-      <div id="qList" class="grid"></div>
-      <div style="height:10px"></div>
-
-      <!-- Optional details -->
-      <div class="card">
-        <h3 style="margin:0 0 6px;color:#111">Optional details</h3>
-        <div style="font-size:12px;color:#444;margin-top:4px">
-          If you share any details below, <b>Name</b>, <b>Surname</b> and a <b>10-digit Phone</b> are required and you must accept POPIA.
-        </div>
-
-        <div class="grid2" style="margin-top:8px">
-          <div><input id="name" placeholder="Name (required if details provided)" autocomplete="off"></div>
-          <div><input id="surname" placeholder="Surname (required if details provided)" autocomplete="off"></div>
-        </div>
-        <div class="grid2" style="margin-top:8px">
-          <div><input id="phone" placeholder="Phone (10 digits, required if details provided)" maxlength="10" autocomplete="off"></div>
-          <div><input id="email" placeholder="Email (optional)" autocomplete="off"></div>
-        </div>
-        <div style="margin-top:8px">
-          <textarea id="feedback" placeholder="Additional feedback (optional)" autocomplete="off"></textarea>
-        </div>
-
-        <!-- POPIA consent -->
-        <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:8px">
-          <input type="checkbox" id="popia" style="margin-top:4px">
-          <small>
-            I consent to the collection and processing of my personal information for customer service and quality feedback purposes
-            in accordance with the Protection of Personal Information Act, 2013 (POPIA).
-          </small>
-        </label>
-
-        <!-- Marketing consent -->
-        <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:6px">
-          <input type="checkbox" id="mk" style="margin-top:4px">
-          <small>
-            I agree to receive marketing communications, promotions, special offers and related content from Chicken Licken via the contact details I provide.
-            I understand I can withdraw my consent at any time.
-          </small>
-        </label>
+    <div class="card">
+      <h3 style="margin:0 0 6px;color:#111">Optional details</h3>
+      <div style="font-size:12px;color:#444;margin-top:4px">
+        If you share any details below, <b>Name</b>, <b>Surname</b> and a <b>10-digit Phone</b> are required and you must accept POPIA.
+      </div>
+      <div class="grid2" style="margin-top:8px">
+        <div><input id="name" placeholder="Name (required if details provided)" autocomplete="off"></div>
+        <div><input id="surname" placeholder="Surname (required if details provided)" autocomplete="off"></div>
+      </div>
+      <div class="grid2" style="margin-top:8px">
+        <div><input id="phone" placeholder="Phone (10 digits, required if details provided)" maxlength="10" autocomplete="off"></div>
+        <div><input id="email" placeholder="Email (optional)" autocomplete="off"></div>
+      </div>
+      <div style="margin-top:8px">
+        <textarea id="feedback" placeholder="Additional feedback (optional)" autocomplete="off"></textarea>
       </div>
 
-      <!-- Footer -->
-      <div class="row-end">
-        <div class="muted" id="storeTag"></div>
-        <div class="muted" id="statusTxt"></div>
-        <button class="btn" id="submitBtn" disabled>Submit</button>
-      </div>
+      <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:8px">
+        <input type="checkbox" id="popia" style="margin-top:4px">
+        <small>
+          I consent to the collection and processing of my personal information for customer service and quality feedback purposes
+          in accordance with the Protection of Personal Information Act, 2013 (POPIA).
+        </small>
+      </label>
+      <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:6px">
+        <input type="checkbox" id="mk" style="margin-top:4px">
+        <small>
+          I agree to receive marketing communications, promotions, special offers and related content from Chicken Licken via the contact details I provide.
+          I understand I can withdraw my consent at any time.
+        </small>
+      </label>
     </div>
-  </div>
 
-  <!-- Thank-you -->
-  <div class="thanks" id="thanks">
-    <div class="in">
-      <h2>Thank you!</h2>
-      <p>Your feedback has been recorded.</p>
-      <button class="btn" id="againBtn">Done</button>
+    <div class="row-end">
+      <div class="muted" id="storeTag"></div>
+      <div class="muted" id="statusTxt"></div>
+      <button class="btn" id="submitBtn" disabled>Submit</button>
     </div>
   </div>
+</div>
+
+<div class="thanks" id="thanks">
+  <div class="in">
+    <h2>Thank you!</h2>
+    <p>Your feedback has been recorded.</p>
+    <button class="btn" id="againBtn">Done</button>
+  </div>
+</div>
 
 <script>
 function normSpaces(s){return (s||'').replace(/\+/g,' ').trim();}
 function getParamAny(keys){
-  const u = new URL(location.href);
-  for (const k of keys){ const v = u.searchParams.get(k); if (v) return normSpaces(v); }
-  if (u.hash && u.hash.includes('=')){
-    const h = new URLSearchParams(u.hash.replace(/^#/, ''));
-    for (const k of keys){ const v = h.get(k); if (v) return normSpaces(v); }
+  const u=new URL(location.href);
+  for(const k of keys){const v=u.searchParams.get(k);if(v)return normSpaces(v);}
+  if(u.hash&&u.hash.includes('=')){const h=new URLSearchParams(u.hash.replace(/^#/,''));
+    for(const k of keys){const v=h.get(k);if(v)return normSpaces(v);}
   }
   return '';
 }
 function getDeviceId(){
-  const keys = ['deviceId','deviceid','did','DeviceId','DEVICEID'];
-  let v = getParamAny(keys);
-  if (v) { localStorage.setItem('cl_deviceId', v); return v; }
-  v = localStorage.getItem('cl_deviceId') || '';
-  if (v) return v;
-  v = (prompt('Enter device ID (e.g. A9-Front-01)') || '').trim();
-  if (v) localStorage.setItem('cl_deviceId', v);
+  const keys=['deviceId','deviceid','did','DeviceId','DEVICEID'];
+  let v=getParamAny(keys);
+  if(v){localStorage.setItem('cl_deviceId',v);return v;}
+  v=localStorage.getItem('cl_deviceId')||'';
+  if(v)return v;
+  v=(prompt('Enter device ID (e.g. A9-Front-01)')||'').trim();
+  if(v)localStorage.setItem('cl_deviceId',v);
   return v;
 }
-function getParam(k){ const u=new URL(location.href); return normSpaces(u.searchParams.get(k)); }
+function getParam(k){const u=new URL(location.href);return normSpaces(u.searchParams.get(k));}
 
-const CFG = {
-  apiUrl: "https://script.google.com/macros/s/AKfycbyYVfQcHkc95Il56206INYeOofXNlbUOwk2J0Jmj2J1oeCd_yLY1tnbM_4bdblfhdU/exec",
-  token:  "CHANGE_ME_SUPER_SECRET",
-  storeId:     getParam('store')    || 'CL-Witbank-Highveld',
-  deviceLabel: getParam('device')   || 'Front Counter',
-  deviceId:    getDeviceId()
+const CFG={
+  apiUrl:"https://script.google.com/macros/s/AKfycbyYVfQcHkc95Il56206INYeOofXNlbUOwk2J0Jmj2J1oeCd_yLY1tnbM_4bdblfhdU/exec",
+  token:"CHANGE_ME_SUPER_SECRET",
+  storeId:getParam('store')||'CL-Witbank-Highveld',
+  deviceLabel:getParam('device')||'Front Counter',
+  deviceId:getDeviceId()
 };
 
-/* ===== QUESTIONS ===== */
-const QUESTIONS = [
-  { id:'Q1', text:'Speed of service' },
-  { id:'Q2', text:'Friendliness of staff' },
-  { id:'Q3', text:'Order accuracy' },
-  { id:'Q4', text:'Cleanliness of store' },
-  { id:'Q5', text:'Overall experience' }
+const QUESTIONS=[
+  {id:'Q1',text:'Speed of service'},
+  {id:'Q2',text:'Friendliness of staff'},
+  {id:'Q3',text:'Order accuracy'},
+  {id:'Q4',text:'Cleanliness of store'},
+  {id:'Q5',text:'Overall experience'}
 ];
-const CHOICES = [
-  { txt:'Excellent', score:5, emo:'😄' },
-  { txt:'Good',      score:4, emo:'🙂' },
-  { txt:'Average',   score:3, emo:'😐' },
-  { txt:'Poor',      score:2, emo:'🙁' },
-  { txt:'Bad',       score:1, emo:'😡' }
+const CHOICES=[
+  {txt:'Excellent',score:5,emo:'😄'},
+  {txt:'Good',score:4,emo:'🙂'},
+  {txt:'Average',score:3,emo:'😐'},
+  {txt:'Poor',score:2,emo:'🙁'},
+  {txt:'Bad',score:1,emo:'😡'}
 ];
 
-/* ===== RENDER ===== */
 function makeQuestion(q){
-  const card = document.createElement('div'); card.className='card';
-  const title = document.createElement('div'); title.className='q-title'; title.textContent=q.text;
-  const row = document.createElement('div'); row.className='q-row'; row.dataset.qid=q.id;
-
+  const card=document.createElement('div');card.className='card';
+  const title=document.createElement('div');title.className='q-title';title.textContent=q.text;
+  const row=document.createElement('div');row.className='q-row';row.dataset.qid=q.id;
   CHOICES.forEach(c=>{
-    const d = document.createElement('div');
-    d.className='opt'; d.dataset.score=c.score;
-    d.innerHTML = `<div class="emo">${c.emo}</div><div class="lbl">${c.txt}</div>`;
-    d.addEventListener('click', ()=>{
+    const d=document.createElement('div');
+    d.className='opt';d.dataset.score=c.score;
+    d.innerHTML=`<div class="emo">${c.emo}</div><div class="lbl">${c.txt}</div>`;
+    d.addEventListener('click',()=>{
       row.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
-      d.classList.add('active'); updateSubmitState();
+      d.classList.add('active');updateSubmitState();
     });
     row.appendChild(d);
   });
-
-  card.appendChild(title); card.appendChild(row);
+  card.appendChild(title);card.appendChild(row);
   return card;
 }
 function render(){
-  const list = document.getElementById('qList');
-  list.innerHTML = '';
-  QUESTIONS.forEach(q => list.appendChild(makeQuestion(q)));
-  document.getElementById('storeTag').textContent = `${CFG.storeId} • ${CFG.deviceLabel} • ${CFG.deviceId || 'no deviceId'}`;
+  const list=document.getElementById('qList');
+  list.innerHTML='';
+  QUESTIONS.forEach(q=>list.appendChild(makeQuestion(q)));
+  document.getElementById('storeTag').textContent=`${CFG.storeId} • ${CFG.deviceLabel} • ${CFG.deviceId||'no deviceId'}`;
 }
 render();
 
-/* ===== VALIDATION + SUBMIT LOGIC ===== */
-function val(id){ return (document.getElementById(id).value || '').trim(); }
-function detailsAnyFilled(){ return !!(val('name') || val('surname') || val('phone') || val('email') || val('feedback')); }
-function allAnswered(){ return QUESTIONS.every(q => document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`)); }
-function markError(id, on){ const el=document.getElementById(id); if (el) el.classList.toggle('error', !!on); }
-
+function val(id){return(document.getElementById(id).value||'').trim();}
+function detailsAnyFilled(){return!!(val('name')||val('surname')||val('phone')||val('email')||val('feedback'));}
+function allAnswered(){return QUESTIONS.every(q=>document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`));}
+function markError(id,on){const el=document.getElementById(id);if(el)el.classList.toggle('error',!!on);}
 function updateSubmitState(){
-  let ok = allAnswered();
-  const any = detailsAnyFilled();
-  const requireName = any && !val('name');
-  const requireSurname = any && !val('surname');
-  const phoneVal = val('phone');
-  const requirePhone = any && !/^\d{10}$/.test(phoneVal);
-  const requirePOPIA = any && !document.getElementById('popia').checked;
-  const em = val('email');
-  const badEmail = em && !/.+@.+\..+/.test(em);
-  markError('name',requireName); markError('surname',requireSurname); markError('phone',requirePhone);
-  if (requireName||requireSurname||requirePhone||requirePOPIA||badEmail) ok=false;
+  let ok=allAnswered();
+  const any=detailsAnyFilled();
+  const requireName=any&&!val('name');
+  const requireSurname=any&&!val('surname');
+  const phoneVal=val('phone');
+  const requirePhone=any&&!/^\d{10}$/.test(phoneVal);
+  const requirePOPIA=any&&!document.getElementById('popia').checked;
+  const em=val('email');
+  const badEmail=em&&!/.+@.+\..+/.test(em);
+  markError('name',requireName);markError('surname',requireSurname);markError('phone',requirePhone);
+  if(requireName||requireSurname||requirePhone||requirePOPIA||badEmail)ok=false;
   document.getElementById('submitBtn').disabled=!ok;
 }
 document.addEventListener('input',updateSubmitState);
@@ -275,11 +259,7 @@ document.getElementById('submitBtn').addEventListener('click',async()=>{
     }
   };
   try{
-    await fetch(CFG.apiUrl,{
-      method:'POST',mode:'no-cors',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify(payload),keepalive:true
-    });
+    await fetch(CFG.apiUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),keepalive:true});
     showThanks();
   }catch(err){console.error(err);toast('Network error');}
 });
