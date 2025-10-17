@@ -26,7 +26,20 @@
   h1{margin:0 0 10px;text-align:center;color:#fff;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.55)}
   .grid{display:grid;gap:10px}
   .card{background:var(--card-rgba);border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.22);backdrop-filter:saturate(120%) blur(2px)}
-  .q-title{font-weight:800;margin-bottom:8px;color:var(--text)}
+  
+  /* --- UPDATED QUESTION STYLE --- */
+  .q-title{
+    font-weight:900;
+    font-size:22px;
+    line-height:1.25;
+    margin-bottom:10px;
+    color:var(--text);
+    letter-spacing:.2px;
+  }
+  @media (max-width:640px){
+    .q-title{font-size:20px;}
+  }
+
   .q-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
   .opt{display:grid;place-items:center;gap:4px;padding:10px;min-height:64px;border-radius:12px;color:#fff;font-weight:800;cursor:pointer;border:2px solid transparent;user-select:none}
   .opt.active{outline:3px solid #000}
@@ -127,7 +140,7 @@
   </div>
 
 <script>
-/* ===== CONFIG (robust deviceId without reset link) ===== */
+/* ===== CONFIG (robust deviceId) ===== */
 function normSpaces(s){return (s||'').replace(/\+/g,' ').trim();}
 function getParamAny(keys){
   const u = new URL(location.href);
@@ -144,7 +157,7 @@ function getDeviceId(){
   if (v) { localStorage.setItem('cl_deviceId', v); return v; }
   v = localStorage.getItem('cl_deviceId') || '';
   if (v) return v;
-  v = (prompt('Enter device ID (e.g. A9-Front-01)') || '').trim();  // one-time prompt if missing
+  v = (prompt('Enter device ID (e.g. A9-Front-01)') || '').trim();
   if (v) localStorage.setItem('cl_deviceId', v);
   return v;
 }
@@ -296,4 +309,3 @@ function toast(msg){ const s=document.getElementById('statusTxt'); if(!s) return
 </script>
 </body>
 </html>
-
