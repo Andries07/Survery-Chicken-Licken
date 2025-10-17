@@ -46,16 +46,13 @@
   .btn:hover{filter:brightness(0.92)}
   .btn:disabled{opacity:.6;cursor:not-allowed}
   .muted{color:#ffffff;opacity:.9;font-size:13px;min-height:18px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
-  .hint{font-size:12px;color:#444;margin-top:4px}
   .thanks{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);place-items:center;z-index:20}
   .thanks .in{background:#fff;padding:22px;border-radius:16px;text-align:center;width:min(420px,92vw);box-shadow:0 18px 54px rgba(0,0,0,.4)}
   .error{outline:2px solid #dc2626}
-  .tiny{font-size:12px;opacity:.85}
-  a.link{color:#fff;text-decoration:underline;cursor:pointer}
 </style>
 </head>
 <body>
-  <!-- Auto-unregister any old service worker & caches (prevents loading old builds on new devices) -->
+  <!-- Unregister any old service worker & clear caches to avoid stale builds -->
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
@@ -76,14 +73,16 @@
       <!-- Optional details -->
       <div class="card">
         <h3 style="margin:0 0 6px;color:#111">Optional details</h3>
-        <div class="hint">If you share any details below, <b>Name</b>, <b>Surname</b> and a <b>10-digit Phone</b> are required and you must accept POPIA.</div>
+        <div style="font-size:12px;color:#444;margin-top:4px">
+          If you share any details below, <b>Name</b>, <b>Surname</b> and a <b>10-digit Phone</b> are required and you must accept POPIA.
+        </div>
 
         <div class="grid2" style="margin-top:8px">
-          <div><input id="name" placeholder="Name (required)" autocomplete="off"></div>
-          <div><input id="surname" placeholder="Surname (required)" autocomplete="off"></div>
+          <div><input id="name" placeholder="Name (required if details provided)" autocomplete="off"></div>
+          <div><input id="surname" placeholder="Surname (required if details provided)" autocomplete="off"></div>
         </div>
         <div class="grid2" style="margin-top:8px">
-          <div><input id="phone" placeholder="Phone (10 digits, required)" maxlength="10" autocomplete="off"></div>
+          <div><input id="phone" placeholder="Phone (10 digits, required if details provided)" maxlength="10" autocomplete="off"></div>
           <div><input id="email" placeholder="Email (optional)" autocomplete="off"></div>
         </div>
         <div style="margin-top:8px">
@@ -112,11 +111,8 @@
       <!-- Footer -->
       <div class="row-end">
         <div class="muted" id="storeTag"></div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="muted tiny">Build: 2025-10-17 • <a class="link" id="resetId">Reset device ID</a></div>
-          <div class="muted" id="statusTxt"></div>
-          <button class="btn" id="submitBtn" disabled>Submit</button>
-        </div>
+        <div class="muted" id="statusTxt"></div>
+        <button class="btn" id="submitBtn" disabled>Submit</button>
       </div>
     </div>
   </div>
@@ -131,22 +127,14 @@
   </div>
 
 <script>
-/* ===== CONFIG (robust deviceId) ===== */
+/* ===== CONFIG (robust deviceId without reset link) ===== */
 function normSpaces(s){return (s||'').replace(/\+/g,' ').trim();}
 function getParamAny(keys){
   const u = new URL(location.href);
-  // query
-  for (const k of keys){
-    const v = u.searchParams.get(k);
-    if (v) return normSpaces(v);
-  }
-  // hash like #deviceId=ABC&...
+  for (const k of keys){ const v = u.searchParams.get(k); if (v) return normSpaces(v); }
   if (u.hash && u.hash.includes('=')){
     const h = new URLSearchParams(u.hash.replace(/^#/, ''));
-    for (const k of keys){
-      const v = h.get(k);
-      if (v) return normSpaces(v);
-    }
+    for (const k of keys){ const v = h.get(k); if (v) return normSpaces(v); }
   }
   return '';
 }
@@ -156,7 +144,7 @@ function getDeviceId(){
   if (v) { localStorage.setItem('cl_deviceId', v); return v; }
   v = localStorage.getItem('cl_deviceId') || '';
   if (v) return v;
-  v = (prompt('Enter device ID (e.g. A9-Front-01)') || '').trim();
+  v = (prompt('Enter device ID (e.g. A9-Front-01)') || '').trim();  // one-time prompt if missing
   if (v) localStorage.setItem('cl_deviceId', v);
   return v;
 }
@@ -284,7 +272,7 @@ document.getElementById('submitBtn').addEventListener('click', async ()=>{
   try{
     await fetch(CFG.apiUrl, {
       method: 'POST',
-      mode: 'no-cors',                    // keeps it simple across devices
+      mode: 'no-cors',
       headers: { 'Content-Type':'text/plain;charset=utf-8' },
       body: JSON.stringify(payload),
       keepalive: true
@@ -305,12 +293,7 @@ document.getElementById('againBtn').addEventListener('click', ()=>{
   updateSubmitState();
 });
 function toast(msg){ const s=document.getElementById('statusTxt'); if(!s) return; s.textContent=msg; clearTimeout(s._t); s._t=setTimeout(()=>s.textContent='',2500); }
-
-/* Reset device ID helper */
-document.getElementById('resetId').addEventListener('click', ()=>{
-  localStorage.removeItem('cl_deviceId');
-  location.reload();
-});
 </script>
 </body>
 </html>
+
