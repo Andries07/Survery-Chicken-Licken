@@ -5,59 +5,30 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Chicken Licken Feedback v2</title>
 <style>
-  /* Reset & sizing */
   *,*::before,*::after{box-sizing:border-box}
   :root{
-    --card-rgba: rgba(255,255,255,0.78); /* card transparency */
-    --field-rgba: rgba(255,255,255,0.9); /* input/textarea bg */
+    --card-rgba: rgba(255,255,255,0.78);
+    --field-rgba: rgba(255,255,255,0.9);
     --text:#111;
     --cl:#ff6900; --green:#16a34a; --green2:#22c55e; --yellow:#facc15; --orange:#fb923c; --red:#dc2626;
   }
   html,body{margin:0;height:100%;font-family:Arial,sans-serif;background:#000}
-
-  /* Repeating logo matrix background */
   .hero{
     min-height:100dvh;
     background-image:url('./background.jpg');
     background-repeat:repeat;
-    background-size:160px auto;      /* adjust tile size if you want */
+    background-size:160px auto;
     background-position:top left;
     display:grid;place-items:start center;
     padding:14px 2vw 24px;
   }
-
-  /* Transparent wrapper so background shows through */
   .wrap{width:min(860px,96vw);background:transparent}
-
-  h1{
-    margin:0 0 10px;text-align:center;color:#ffffff;
-    font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.55);
-  }
-
+  h1{margin:0 0 10px;text-align:center;color:#fff;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.55)}
   .grid{display:grid;gap:10px}
-
-  /* Semi-transparent cards */
-  .card{
-    background:var(--card-rgba);
-    border-radius:14px;
-    padding:12px;
-    box-shadow:0 10px 24px rgba(0,0,0,.22);
-    backdrop-filter:saturate(120%) blur(2px);
-  }
-
+  .card{background:var(--card-rgba);border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.22);backdrop-filter:saturate(120%) blur(2px)}
   .q-title{font-weight:800;margin-bottom:8px;color:var(--text)}
-
-  /* Buttons row: ALWAYS 5 in one line, responsive */
-  .q-row{
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:8px;
-  }
-  .opt{
-    display:grid;place-items:center;gap:4px;
-    padding:10px;min-height:64px;border-radius:12px;color:#fff;font-weight:800;cursor:pointer;
-    border:2px solid transparent; user-select:none;
-  }
+  .q-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .opt{display:grid;place-items:center;gap:4px;padding:10px;min-height:64px;border-radius:12px;color:#fff;font-weight:800;cursor:pointer;border:2px solid transparent;user-select:none}
   .opt.active{outline:3px solid #000}
   .opt[data-score="5"]{background:var(--green)}
   .opt[data-score="4"]{background:var(--green2)}
@@ -66,27 +37,15 @@
   .opt[data-score="1"]{background:var(--red)}
   .emo{font-size:22px}
   .lbl{font-size:13px}
-
-  /* Optional details */
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   @media (max-width:640px){.grid2{grid-template-columns:1fr}}
-  input,textarea{
-    width:100%;padding:10px;border:1.4px solid #ddd;border-radius:10px;font-size:15px;min-width:0;
-    background:var(--field-rgba);
-  }
+  input,textarea{width:100%;padding:10px;border:1.4px solid #ddd;border-radius:10px;font-size:15px;min-width:0;background:var(--field-rgba)}
   textarea{min-height:64px;resize:vertical}
-
   .row-end{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:6px}
-  .btn{
-    background:#000;            /* BLACK submit button */
-    color:#fff;border:0;border-radius:12px;padding:12px 16px;font-weight:900;font-size:17px;cursor:pointer;
-    box-shadow:0 4px 12px rgba(0,0,0,.25);
-  }
+  .btn{background:#000;color:#fff;border:0;border-radius:12px;padding:12px 16px;font-weight:900;font-size:17px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.25)}
   .btn:hover{filter:brightness(0.92)}
   .btn:disabled{opacity:.6;cursor:not-allowed}
   .muted{color:#ffffff;opacity:.9;font-size:13px;min-height:18px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
-
-  /* Thanks overlay */
   .thanks{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);place-items:center;z-index:20}
   .thanks .in{background:#fff;padding:22px;border-radius:16px;text-align:center;width:min(420px,92vw);box-shadow:0 18px 54px rgba(0,0,0,.4)}
 </style>
@@ -95,14 +54,10 @@
   <div class="hero">
     <div class="wrap">
       <h1>Chicken Licken Quick Feedback</h1>
-
-      <!-- Questions container: each question is its own semi-transparent card -->
       <div id="qList" class="grid"></div>
-
-      <!-- Spacer between questions and optional details -->
       <div style="height:10px"></div>
 
-      <!-- Optional details (semi-transparent card) -->
+      <!-- Optional details -->
       <div class="card">
         <h3 style="margin:0 0 6px;color:#111">Optional details</h3>
         <div class="grid2">
@@ -116,13 +71,26 @@
         <div style="margin-top:8px">
           <textarea id="feedback" placeholder="Additional feedback (optional)" autocomplete="off"></textarea>
         </div>
+
+        <!-- POPIA consent (required if personal details provided) -->
         <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:8px">
           <input type="checkbox" id="popia" style="margin-top:4px">
-          <small>I consent to the collection and processing of my personal information for customer service and quality feedback purposes, in accordance with the POPIA.</small>
+          <small>
+            I consent to the collection and processing of my personal information for customer service and quality feedback purposes
+            in accordance with the Protection of Personal Information Act, 2013 (POPIA).
+          </small>
+        </label>
+
+        <!-- Marketing consent (optional opt-in) -->
+        <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:6px">
+          <input type="checkbox" id="mk" style="margin-top:4px">
+          <small>
+            I agree to receive marketing communications, promotions, special offers and related content from Chicken Licken via the contact details I provide.
+            I understand I can withdraw my consent at any time.
+          </small>
         </label>
       </div>
 
-      <!-- Footer on top of background (readable via light text + shadow) -->
       <div class="row-end">
         <div class="muted" id="storeTag"></div>
         <div style="display:flex;align-items:center;gap:8px">
@@ -133,7 +101,6 @@
     </div>
   </div>
 
-  <!-- Thank-you -->
   <div class="thanks" id="thanks">
     <div class="in">
       <h2>Thank you!</h2>
@@ -145,10 +112,11 @@
 <script>
 /* ===== CONFIG ===== */
 const CFG = {
-  apiUrl: "https://script.google.com/macros/s/AKfycbx2l54K_wAYwkpg6AGd7zQdyoeOzbbNPOevOPeCc4FpBXeEG01hj25TVhhZJGZ5oLBq/exec",            // <-- your /exec URL
-  token:  "CHANGE_ME_SUPER_SECRET2",               // <-- must match Apps Script
-  storeId: getParam('store') || 'CL-Witbank-Highveld',
-  deviceLabel: getParam('device') || 'Front Counter'
+  apiUrl: "https://script.google.com/macros/s/AKfycbz0VpRl1ebCJxoBxBti45Ww0FcUzNzuwOb0mbbifjINmt3Y8Wptqt48I49SepXxwsha/exec",
+  token:  "CHANGE_ME_SUPER_SECRET2",
+  storeId:    getParam('store')    || 'CL-Witbank-Highveld',
+  deviceLabel:getParam('device')   || 'Front Counter',
+  deviceId:   getParam('deviceId') || ''   // IMPORTANT
 };
 function getParam(k){ const u=new URL(location.href); return u.searchParams.get(k); }
 
@@ -188,36 +156,24 @@ function makeQuestion(q){
   card.appendChild(title); card.appendChild(row);
   return card;
 }
-
 function render(){
   const list = document.getElementById('qList');
   list.innerHTML = '';
   QUESTIONS.forEach(q => list.appendChild(makeQuestion(q)));
-  document.getElementById('storeTag').textContent = `${CFG.storeId} • ${CFG.deviceLabel}`;
+  document.getElementById('storeTag').textContent = `${CFG.storeId} • ${CFG.deviceLabel} • ${CFG.deviceId || 'no deviceId'}`;
 }
 render();
 
 /* ===== VALIDATION ===== */
-function allAnswered(){
-  return QUESTIONS.every(q => document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`));
-}
-function needsPOPIA(){
-  return !!(val('name') || val('surname') || val('phone') || val('email'));
-}
+function allAnswered(){ return QUESTIONS.every(q => document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`)); }
+function needsPOPIA(){ return !!(val('name') || val('surname') || val('phone') || val('email')); }
 function val(id){ return (document.getElementById(id).value || '').trim(); }
 
 function updateSubmitState(){
   let ok = allAnswered();
   if (needsPOPIA() && !document.getElementById('popia').checked) ok = false;
-
-  // phone: 10 digits if provided
-  const ph = val('phone');
-  if (ph && !/^\d{10}$/.test(ph)) ok = false;
-
-  // email: must contain @ and .
-  const em = val('email');
-  if (em && !/.+@.+\..+/.test(em)) ok = false;
-
+  const ph = val('phone'); if (ph && !/^\d{10}$/.test(ph)) ok = false;
+  const em = val('email'); if (em && !/.+@.+\..+/.test(em)) ok = false;
   document.getElementById('submitBtn').disabled = !ok;
 }
 document.addEventListener('input', updateSubmitState);
@@ -239,12 +195,18 @@ document.getElementById('submitBtn').addEventListener('click', async ()=>{
   const payload = {
     token: CFG.token,
     clientId: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    storeId: CFG.storeId, deviceLabel: CFG.deviceLabel, deviceId: '',
+    storeId: CFG.storeId,
+    deviceLabel: CFG.deviceLabel,
+    deviceId: CFG.deviceId,                    // send deviceId
     pressedAtUtc: new Date().toISOString(),
     answers,
+    marketingConsent: document.getElementById('mk').checked === true, // send marketing consent
     customer: {
-      name: val('name'), surname: val('surname'), phone: val('phone'),
-      email: val('email'), feedback: val('feedback'),
+      name: val('name'),
+      surname: val('surname'),
+      phone: val('phone'),
+      email: val('email'),
+      feedback: val('feedback'),
       consent: document.getElementById('popia').checked || null
     }
   };
@@ -252,7 +214,7 @@ document.getElementById('submitBtn').addEventListener('click', async ()=>{
   try{
     await fetch(CFG.apiUrl, {
       method: 'POST',
-      mode: 'no-cors', /* avoids CORS blocks; server still receives body */
+      mode: 'no-cors',
       headers: { 'Content-Type':'text/plain;charset=utf-8' },
       body: JSON.stringify(payload),
       keepalive: true
@@ -262,13 +224,14 @@ document.getElementById('submitBtn').addEventListener('click', async ()=>{
 });
 
 function showThanks(){
-  const t = document.getElementById('thanks'); t.style.display='grid';
+  document.getElementById('thanks').style.display='grid';
 }
 document.getElementById('againBtn').addEventListener('click', ()=>{
   document.getElementById('thanks').style.display='none';
   document.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
   ['name','surname','phone','email','feedback'].forEach(id => document.getElementById(id).value='');
   document.getElementById('popia').checked = false;
+  document.getElementById('mk').checked = false;
   updateSubmitState();
 });
 
