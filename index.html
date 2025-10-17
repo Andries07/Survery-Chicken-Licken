@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Chicken Licken Feedback</title>
 
-<!-- PWA / iPad full screen setup -->
+<!-- PWA / iPad full-screen -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CL Feedback">
@@ -33,6 +33,7 @@
   }
   .wrap{width:min(860px,96vw);background:transparent}
 
+  /* Title (white) */
   h1{
     margin:0 0 10px;
     text-align:center;
@@ -45,6 +46,7 @@
   .grid{display:grid;gap:10px}
   .card{background:var(--card-rgba);border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.22);backdrop-filter:saturate(120%) blur(2px)}
 
+  /* Question titles (slightly smaller) */
   .q-title{
     font-weight:900;
     font-size:20px;
@@ -81,6 +83,7 @@
 </head>
 <body>
 <script>
+  // Prevent stale builds on tablets
   if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()));}
   if('caches' in window){caches.keys().then(k=>k.forEach(c=>caches.delete(c)));}
 </script>
@@ -88,6 +91,7 @@
 <div class="hero">
   <div class="wrap">
     <h1>Chicken Licken Quick Feedback</h1>
+
     <div id="qList" class="grid"></div>
     <div style="height:10px"></div>
 
