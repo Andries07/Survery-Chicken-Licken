@@ -23,31 +23,31 @@
     padding:14px 2vw 24px;
   }
   .wrap{width:min(860px,96vw);background:transparent}
-  
-  /* --- UPDATED HEADER --- */
+
+  /* Title back to white */
   h1{
     margin:0 0 10px;
     text-align:center;
-    color:#000;                 /* changed from white to black */
+    color:#fff;                /* WHITE again */
     font-weight:900;
     font-size:28px;
-    text-shadow:none;
+    text-shadow:0 2px 8px rgba(0,0,0,.55);
   }
 
   .grid{display:grid;gap:10px}
   .card{background:var(--card-rgba);border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.22);backdrop-filter:saturate(120%) blur(2px)}
-  
-  /* --- QUESTION TITLE (bold & bigger) --- */
+
+  /* Question titles a bit smaller */
   .q-title{
     font-weight:900;
-    font-size:22px;
+    font-size:20px;            /* was 22px */
     line-height:1.25;
     margin-bottom:10px;
     color:var(--text);
     letter-spacing:.2px;
   }
   @media (max-width:640px){
-    .q-title{font-size:20px;}
+    .q-title{font-size:18px;}  /* was 20px */
   }
 
   .q-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
