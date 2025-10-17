@@ -23,11 +23,21 @@
     padding:14px 2vw 24px;
   }
   .wrap{width:min(860px,96vw);background:transparent}
-  h1{margin:0 0 10px;text-align:center;color:#fff;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.55)}
+  
+  /* --- UPDATED HEADER --- */
+  h1{
+    margin:0 0 10px;
+    text-align:center;
+    color:#000;                 /* changed from white to black */
+    font-weight:900;
+    font-size:28px;
+    text-shadow:none;
+  }
+
   .grid{display:grid;gap:10px}
   .card{background:var(--card-rgba);border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.22);backdrop-filter:saturate(120%) blur(2px)}
   
-  /* --- UPDATED QUESTION STYLE --- */
+  /* --- QUESTION TITLE (bold & bigger) --- */
   .q-title{
     font-weight:900;
     font-size:22px;
@@ -65,7 +75,7 @@
 </style>
 </head>
 <body>
-  <!-- Unregister any old service worker & clear caches to avoid stale builds -->
+  <!-- Clear any old caches/service workers -->
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
@@ -102,7 +112,7 @@
           <textarea id="feedback" placeholder="Additional feedback (optional)" autocomplete="off"></textarea>
         </div>
 
-        <!-- POPIA consent (required if personal details provided) -->
+        <!-- POPIA consent -->
         <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:8px">
           <input type="checkbox" id="popia" style="margin-top:4px">
           <small>
@@ -111,7 +121,7 @@
           </small>
         </label>
 
-        <!-- Marketing consent (optional opt-in) -->
+        <!-- Marketing consent -->
         <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:6px">
           <input type="checkbox" id="mk" style="margin-top:4px">
           <small>
@@ -140,7 +150,6 @@
   </div>
 
 <script>
-/* ===== CONFIG (robust deviceId) ===== */
 function normSpaces(s){return (s||'').replace(/\+/g,' ').trim();}
 function getParamAny(keys){
   const u = new URL(location.href);
@@ -164,8 +173,8 @@ function getDeviceId(){
 function getParam(k){ const u=new URL(location.href); return normSpaces(u.searchParams.get(k)); }
 
 const CFG = {
-  apiUrl: "https://script.google.com/macros/s/AKfycbyYVfQcHkc95Il56206INYeOofXNlbUOwk2J0Jmj2J1oeCd_yLY1tnbM_4bdblfhdU/exec",      // <<< your Apps Script /exec
-  token:  "CHANGE_ME_SUPER_SECRET",        // <<< must match SHARED_TOKEN
+  apiUrl: "https://script.google.com/macros/s/AKfycbyYVfQcHkc95Il56206INYeOofXNlbUOwk2J0Jmj2J1oeCd_yLY1tnbM_4bdblfhdU/exec",
+  token:  "CHANGE_ME_SUPER_SECRET",
   storeId:     getParam('store')    || 'CL-Witbank-Highveld',
   deviceLabel: getParam('device')   || 'Front Counter',
   deviceId:    getDeviceId()
@@ -215,7 +224,7 @@ function render(){
 }
 render();
 
-/* ===== VALIDATION ===== */
+/* ===== VALIDATION + SUBMIT LOGIC ===== */
 function val(id){ return (document.getElementById(id).value || '').trim(); }
 function detailsAnyFilled(){ return !!(val('name') || val('surname') || val('phone') || val('email') || val('feedback')); }
 function allAnswered(){ return QUESTIONS.every(q => document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`)); }
@@ -223,89 +232,67 @@ function markError(id, on){ const el=document.getElementById(id); if (el) el.cla
 
 function updateSubmitState(){
   let ok = allAnswered();
-
   const any = detailsAnyFilled();
-  const requireName    = any && !val('name');
+  const requireName = any && !val('name');
   const requireSurname = any && !val('surname');
-  const phoneVal       = val('phone');
-  const requirePhone   = any && !/^\d{10}$/.test(phoneVal);
-  const requirePOPIA   = any && !document.getElementById('popia').checked;
-
+  const phoneVal = val('phone');
+  const requirePhone = any && !/^\d{10}$/.test(phoneVal);
+  const requirePOPIA = any && !document.getElementById('popia').checked;
   const em = val('email');
   const badEmail = em && !/.+@.+\..+/.test(em);
-
-  markError('name',    requireName);
-  markError('surname', requireSurname);
-  markError('phone',   requirePhone);
-
-  if (requireName || requireSurname || requirePhone || requirePOPIA || badEmail) ok = false;
-  document.getElementById('submitBtn').disabled = !ok;
+  markError('name',requireName); markError('surname',requireSurname); markError('phone',requirePhone);
+  if (requireName||requireSurname||requirePhone||requirePOPIA||badEmail) ok=false;
+  document.getElementById('submitBtn').disabled=!ok;
 }
-document.addEventListener('input', updateSubmitState);
+document.addEventListener('input',updateSubmitState);
 
-/* ===== SUBMIT ===== */
-document.getElementById('submitBtn').addEventListener('click', async ()=>{
-  if (!allAnswered()) { toast('Please answer all questions'); return; }
-
-  const any = detailsAnyFilled();
-  if (any){
-    if (!val('name'))    { toast('Please enter your Name'); return; }
-    if (!val('surname')) { toast('Please enter your Surname'); return; }
-    const ph = val('phone'); if (!/^\d{10}$/.test(ph)) { toast('Please enter a valid 10-digit Phone'); return; }
-    if (!document.getElementById('popia').checked){ toast('Tick POPIA consent when providing personal details'); return; }
+document.getElementById('submitBtn').addEventListener('click',async()=>{
+  if(!allAnswered()){toast('Please answer all questions');return;}
+  const any=detailsAnyFilled();
+  if(any){
+    if(!val('name')){toast('Please enter your Name');return;}
+    if(!val('surname')){toast('Please enter your Surname');return;}
+    const ph=val('phone');if(!/^\d{10}$/.test(ph)){toast('Please enter a valid 10-digit Phone');return;}
+    if(!document.getElementById('popia').checked){toast('Tick POPIA consent when providing personal details');return;}
   }
-  const em = val('email'); if (em && !/.+@.+\..+/.test(em)) { toast('Enter a valid Email'); return; }
-
-  const answers = QUESTIONS.map(q=>{
-    const el = document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`);
-    const score = Number(el.dataset.score);
-    const ch = CHOICES.find(c=>c.score===score);
-    return { questionId: q.text, choiceText: ch.txt, choiceScore: score };
+  const em=val('email');if(em&&!/.+@.+\..+/.test(em)){toast('Enter a valid Email');return;}
+  const answers=QUESTIONS.map(q=>{
+    const el=document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`);
+    const score=Number(el.dataset.score);
+    const ch=CHOICES.find(c=>c.score===score);
+    return{questionId:q.text,choiceText:ch.txt,choiceScore:score};
   });
-
-  const payload = {
-    token: CFG.token,
-    clientId: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    storeId: CFG.storeId,
-    deviceLabel: CFG.deviceLabel,
-    deviceId: CFG.deviceId,
-    pressedAtUtc: new Date().toISOString(),
-    answers,
-    marketingConsent: document.getElementById('mk').checked === true,
-    customer: {
-      name: val('name'),
-      surname: val('surname'),
-      phone: val('phone'),
-      email: val('email'),
-      feedback: val('feedback'),
-      consent: document.getElementById('popia').checked || null
+  const payload={
+    token:CFG.token,
+    clientId:`${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    storeId:CFG.storeId,deviceLabel:CFG.deviceLabel,deviceId:CFG.deviceId,
+    pressedAtUtc:new Date().toISOString(),answers,
+    marketingConsent:document.getElementById('mk').checked===true,
+    customer:{
+      name:val('name'),surname:val('surname'),phone:val('phone'),
+      email:val('email'),feedback:val('feedback'),
+      consent:document.getElementById('popia').checked||null
     }
   };
-
   try{
-    await fetch(CFG.apiUrl, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type':'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload),
-      keepalive: true
+    await fetch(CFG.apiUrl,{
+      method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(payload),keepalive:true
     });
     showThanks();
-  }catch(err){ console.error(err); toast('Network error'); }
+  }catch(err){console.error(err);toast('Network error');}
 });
-
-function showThanks(){
-  document.getElementById('thanks').style.display='grid';
-}
-document.getElementById('againBtn').addEventListener('click', ()=>{
+function showThanks(){document.getElementById('thanks').style.display='grid';}
+document.getElementById('againBtn').addEventListener('click',()=>{
   document.getElementById('thanks').style.display='none';
   document.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
-  ['name','surname','phone','email','feedback'].forEach(id => document.getElementById(id).value='');
-  document.getElementById('popia').checked = false;
-  document.getElementById('mk').checked = false;
+  ['name','surname','phone','email','feedback'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('popia').checked=false;
+  document.getElementById('mk').checked=false;
   updateSubmitState();
 });
-function toast(msg){ const s=document.getElementById('statusTxt'); if(!s) return; s.textContent=msg; clearTimeout(s._t); s._t=setTimeout(()=>s.textContent='',2500); }
+function toast(msg){const s=document.getElementById('statusTxt');if(!s)return;s.textContent=msg;clearTimeout(s._t);s._t=setTimeout(()=>s.textContent='',2500);}
 </script>
 </body>
 </html>
