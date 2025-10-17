@@ -152,7 +152,7 @@ function getParam(k){ const u=new URL(location.href); return normSpaces(u.search
 
 const CFG = {
   apiUrl: "https://script.google.com/macros/s/AKfycbyYVfQcHkc95Il56206INYeOofXNlbUOwk2J0Jmj2J1oeCd_yLY1tnbM_4bdblfhdU/exec",      // <<< your Apps Script /exec
-  token:  "CHANGE_ME_SUPER_SECRET2",        // <<< must match SHARED_TOKEN
+  token:  "CHANGE_ME_SUPER_SECRET",        // <<< must match SHARED_TOKEN
   storeId:     getParam('store')    || 'CL-Witbank-Highveld',
   deviceLabel: getParam('device')   || 'Front Counter',
   deviceId:    getDeviceId()
