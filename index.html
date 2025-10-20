@@ -281,7 +281,7 @@ function showThanks(){
   const el=document.getElementById('thanks');
   el.style.display='grid';
   clearTimeout(el._t);
-  el._t=setTimeout(()=>{ el.style.display='none'; resetForm(); }, 1000);
+  el._t=setTimeout(()=>{ el.style.display='none'; resetForm(); }, 2500);
 }
 function resetForm(){
   document.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
