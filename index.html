@@ -16,175 +16,129 @@
     --card-rgba: rgba(255,255,255,0.78);
     --field-rgba: rgba(255,255,255,0.9);
     --text:#111;
-    --cl:#ff6900; --green:#16a34a; --green2:#22c55e; --yellow:#facc15; --orange:#fb923c; --red:#dc2626;
+    --green:#16a34a; --green2:#22c55e; --yellow:#facc15; --orange:#fb923c; --red:#dc2626;
   }
   html,body{margin:0;height:100%;font-family:Arial,sans-serif;background:#000}
 
-  /* Full-bleed tile background */
+  /* One-page area */
   .hero{
-    height:100dvh; /* force 1 page */
+    height:100dvh;
     background-image:url('./background.jpg');
     background-repeat:repeat;
-    background-size:140px auto; /* slightly denser to save space */
+    background-size:128px auto;             /* a touch denser */
     background-position:top left;
     display:grid;place-items:start center;
-    padding:10px 2vw 12px;
+    padding:8px 2vw 10px;
   }
-
-  /* Single page scaling: keep max width small so it fits on A9 */
-  .wrap{width:min(760px,96vw);background:transparent;display:grid;grid-template-rows:auto 1fr auto;gap:8px}
-
-  /* Title — compact */
+  .wrap{
+    width:min(760px,96vw);
+    height:100%;
+    display:grid;
+    grid-template-rows:auto 1fr auto;       /* title | content | footer */
+    gap:6px;
+  }
   h1{
     margin:0;
     text-align:center;
     color:#fff;
     font-weight:900;
-    font-size:22px; /* smaller */
+    font-size:20px;                          /* compact */
     line-height:1.1;
     text-shadow:0 2px 8px rgba(0,0,0,.55);
   }
 
-  .grid{display:grid;gap:8px}
-
-  /* Make each question compact */
-  .card{
-    background:var(--card-rgba);
-    border-radius:12px;
-    padding:10px;
-    box-shadow:0 8px 18px rgba(0,0,0,.22);
-    backdrop-filter:saturate(120%) blur(2px);
+  /* CONTENT area: questions + (collapsed) optional */
+  .content{
+    min-height:0;                            /* allow flex */
+    overflow:hidden;                         /* no scroll */
+    display:grid;grid-template-rows:auto auto;gap:6px;
   }
 
-  .q-title{
-    font-weight:900;
-    font-size:16px; /* compact */
-    line-height:1.2;
-    margin-bottom:6px;
-    color:var(--text);
-    letter-spacing:.2px;
-  }
+  .grid{display:grid;gap:6px}
+  .card{background:var(--card-rgba);border-radius:10px;padding:8px;box-shadow:0 6px 14px rgba(0,0,0,.22);backdrop-filter:saturate(120%) blur(2px)}
+  .q-title{font-weight:900;font-size:15px;line-height:1.2;margin-bottom:4px;color:var(--text);letter-spacing:.2px}
 
-  .q-row{
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:6px; /* tighter */
-  }
-
-  .opt{
-    display:grid;place-items:center;gap:2px;
-    padding:8px;min-height:48px; /* smaller buttons */
-    border-radius:10px;color:#fff;font-weight:800;
-    cursor:pointer;border:2px solid transparent;user-select:none
-  }
+  .q-row{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+  .opt{display:grid;place-items:center;gap:2px;padding:7px;min-height:42px;border-radius:9px;color:#fff;font-weight:800;cursor:pointer;border:2px solid transparent;user-select:none}
   .opt.active{outline:3px solid #000}
   .opt[data-score="5"]{background:var(--green)}
   .opt[data-score="4"]{background:var(--green2)}
   .opt[data-score="3"]{background:var(--yellow);color:#111}
   .opt[data-score="2"]{background:var(--orange)}
   .opt[data-score="1"]{background:var(--red)}
-  .emo{font-size:18px}
-  .lbl{font-size:12px}
+  .emo{font-size:17px}
+  .lbl{font-size:11px}
 
-  /* Optional details — compact grid */
+  /* Optional details: collapsed by default using <details> */
+  details{background:var(--card-rgba);border-radius:10px;padding:6px}
+  summary{cursor:pointer;font-weight:900;font-size:14px;outline:none}
+  details[open]{padding:8px}
+  .tiny{font-size:11px;color:#444;margin-top:2px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
   @media (max-width:640px){.grid2{grid-template-columns:1fr}}
-
-  input,textarea{
-    width:100%;padding:8px;border:1.2px solid #ddd;border-radius:10px;
-    font-size:14px;min-width:0;background:var(--field-rgba)
-  }
-  textarea{min-height:56px;resize:vertical}
-
-  .tiny{font-size:11px;color:#444;margin-top:2px}
-
-  .row-end{
-    display:flex;justify-content:space-between;align-items:center;
-    flex-wrap:wrap;gap:6px;margin-top:4px
-  }
-  .btn{
-    background:#000;color:#fff;border:0;border-radius:10px;
-    padding:10px 14px;font-weight:900;font-size:15px;cursor:pointer;
-    box-shadow:0 4px 10px rgba(0,0,0,.25)
-  }
-  .btn:hover{filter:brightness(0.92)}
-  .btn:disabled{opacity:.6;cursor:not-allowed}
-  .muted{color:#ffffff;opacity:.9;font-size:12px;min-height:18px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+  input,textarea{width:100%;padding:7px;border:1.2px solid #ddd;border-radius:9px;font-size:13px;min-width:0;background:var(--field-rgba)}
+  textarea{min-height:54px;resize:vertical}
   .error{outline:2px solid #dc2626}
 
-  /* Thank-you overlay with SAME tiled background + quick auto close */
+  .row-end{display:flex;justify-content:space-between;align-items:center;gap:6px}
+  .btn{background:#000;color:#fff;border:0;border-radius:10px;padding:9px 12px;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .muted{color:#ffffff;opacity:.9;font-size:12px;min-height:16px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+
+  /* Thank-you overlay with SAME background & fast auto close */
   .thanks{display:none;position:fixed;inset:0;z-index:20;place-items:center}
   .thanks::before{
     content:"";position:absolute;inset:0;
-    background-image:url('./background.jpg');
-    background-repeat:repeat;background-size:140px auto;opacity:.8
+    background-image:url('./background.jpg');background-repeat:repeat;background-size:128px auto;opacity:.85
   }
-  .thanks .in{
-    position:relative;background:#fff;padding:18px;border-radius:14px;
-    text-align:center;width:min(360px,92vw);box-shadow:0 18px 54px rgba(0,0,0,.4)
-  }
+  .thanks .in{position:relative;background:#fff;padding:14px;border-radius:12px;text-align:center;width:min(320px,92vw);box-shadow:0 18px 54px rgba(0,0,0,.4)}
 </style>
 </head>
 <body>
 <script>
-  // Clear old SW/caches for fresh updates
+  // Unregister any SW & clear caches
   if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()));}
   if('caches' in window){caches.keys().then(k=>k.forEach(c=>caches.delete(c)));}
 
-  // (Optional) auto-reload when version.json changes
-  (function(){
-    const POLL = 10*60*1000; // a bit faster checks (10 min)
-    function check(){
-      fetch('./version.json?ts='+Date.now())
-        .then(r=>r.json())
-        .then(v=>{
-          const cur = localStorage.getItem('appVersion');
-          if(!cur) localStorage.setItem('appVersion', v.version);
-          if(cur && cur !== v.version){
-            localStorage.setItem('appVersion', v.version);
-            location.reload(true);
-          }
-        }).catch(()=>{});
-    }
-    try{ check(); setInterval(check,POLL); }catch(e){}
-  })();
+  // Optional: auto-reload when version.json changes (10 min)
+  (function(){const POLL=10*60*1000;function check(){fetch('./version.json?ts='+Date.now()).then(r=>r.json()).then(v=>{const cur=localStorage.getItem('appVersion');if(!cur)localStorage.setItem('appVersion',v.version);if(cur&&cur!==v.version){localStorage.setItem('appVersion',v.version);location.reload(true);}}).catch(()=>{});}try{check();setInterval(check,POLL);}catch(e){}})();
 </script>
 
 <div class="hero">
   <div class="wrap">
     <h1>Chicken Licken Quick Feedback</h1>
 
-    <!-- QUESTIONS -->
-    <div id="qList" class="grid"></div>
+    <div class="content">
+      <!-- QUESTIONS -->
+      <div id="qList" class="grid"></div>
 
-    <!-- OPTIONAL DETAILS (kept but tighter copy) -->
-    <div class="card">
-      <h3 class="q-title" style="margin:0 0 4px">Optional details</h3>
-      <div class="tiny">If you add details, <b>Name</b>, <b>Surname</b> and a valid <b>10-digit Phone</b> are required and you must accept POPIA.</div>
-
-      <div class="grid2" style="margin-top:6px">
-        <div><input id="name" placeholder="Name" autocomplete="off" maxlength="50"></div>
-        <div><input id="surname" placeholder="Surname" autocomplete="off" maxlength="50"></div>
-      </div>
-      <div class="grid2" style="margin-top:6px">
-        <div><input id="phone" placeholder="Phone (10 digits)" maxlength="10" autocomplete="off"></div>
-        <div><input id="email" placeholder="Email (optional)" autocomplete="off"></div>
-      </div>
-      <div style="margin-top:6px">
-        <textarea id="feedback" placeholder="Additional feedback (optional)" autocomplete="off" maxlength="3000"></textarea>
-      </div>
-
-      <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:6px">
-        <input type="checkbox" id="popia" style="margin-top:3px">
-        <small>I consent to processing my personal info for service quality in line with POPIA.</small>
-      </label>
-      <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:4px">
-        <input type="checkbox" id="mk" style="margin-top:3px">
-        <small>I agree to receive promotions and can unsubscribe anytime.</small>
-      </label>
+      <!-- OPTIONAL DETAILS (collapsed) -->
+      <details id="optDetails">
+        <summary>Optional details</summary>
+        <div class="tiny">If you add details, <b>Name</b>, <b>Surname</b> and a valid <b>10-digit Phone</b> are required and you must accept POPIA.</div>
+        <div class="grid2" style="margin-top:6px">
+          <div><input id="name" placeholder="Name" autocomplete="off" maxlength="50"></div>
+          <div><input id="surname" placeholder="Surname" autocomplete="off" maxlength="50"></div>
+        </div>
+        <div class="grid2" style="margin-top:6px">
+          <div><input id="phone" placeholder="Phone (10 digits)" maxlength="10" autocomplete="off"></div>
+          <div><input id="email" placeholder="Email (optional)" autocomplete="off"></div>
+        </div>
+        <div style="margin-top:6px">
+          <textarea id="feedback" placeholder="Additional feedback (optional)" autocomplete="off" maxlength="3000"></textarea>
+        </div>
+        <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:6px">
+          <input type="checkbox" id="popia" style="margin-top:3px">
+          <small>I consent to processing my personal info for service quality in line with POPIA.</small>
+        </label>
+        <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:4px">
+          <input type="checkbox" id="mk" style="margin-top:3px">
+          <small>I agree to receive promotions and can unsubscribe anytime.</small>
+        </label>
+      </details>
     </div>
 
-    <!-- FOOTER / SUBMIT -->
+    <!-- FOOTER -->
     <div class="row-end">
       <div class="muted" id="storeTag"></div>
       <div class="muted" id="statusTxt"></div>
@@ -193,11 +147,11 @@
   </div>
 </div>
 
-<!-- THANK YOU (auto resets quickly) -->
+<!-- THANK YOU (auto close) -->
 <div class="thanks" id="thanks">
   <div class="in">
     <h2 style="margin:0 0 6px">Thank you!</h2>
-    <p style="margin:0 0 8px">Your feedback was recorded.</p>
+    <p style="margin:0 0 6px">Your feedback was recorded.</p>
     <div class="tiny">Ready for the next customer…</div>
   </div>
 </div>
@@ -205,36 +159,20 @@
 <script>
 /* ===== UTIL ===== */
 function normSpaces(s){return (s||'').replace(/\+/g,' ').trim();}
-function getParamAny(keys){
-  const u=new URL(location.href);
-  for(const k of keys){const v=u.searchParams.get(k);if(v)return normSpaces(v);}
-  if(u.hash&&u.hash.includes('=')){const h=new URLSearchParams(u.hash.replace(/^#/,''));
-    for(const k of keys){const v=h.get(k);if(v)return normSpaces(v);}
-  }
-  return '';
-}
+function getParamAny(keys){const u=new URL(location.href);for(const k of keys){const v=u.searchParams.get(k);if(v)return normSpaces(v);}if(u.hash&&u.hash.includes('=')){const h=new URLSearchParams(u.hash.replace(/^#/,''));for(const k of keys){const v=h.get(k);if(v)return normSpaces(v);}}return '';}
 function getParam(k){const u=new URL(location.href);return normSpaces(u.searchParams.get(k));}
-function getDeviceId(){
-  const keys=['deviceId','deviceid','did','DeviceId','DEVICEID'];
-  let v=getParamAny(keys);
-  if(v){localStorage.setItem('cl_deviceId',v);return v;}
-  v=localStorage.getItem('cl_deviceId')||'';
-  if(v)return v;
-  v=(prompt('Enter device ID (e.g. A9-Front-01)')||'').trim();
-  if(v)localStorage.setItem('cl_deviceId',v);
-  return v;
-}
+function getDeviceId(){const keys=['deviceId','deviceid','did','DeviceId','DEVICEID'];let v=getParamAny(keys);if(v){localStorage.setItem('cl_deviceId',v);return v;}v=localStorage.getItem('cl_deviceId')||'';if(v)return v;v=(prompt('Enter device ID (e.g. A9-Front-01)')||'').trim();if(v)localStorage.setItem('cl_deviceId',v);return v;}
 
 /* ===== CONFIG (SET THESE) ===== */
 const CFG = {
-  apiUrl: "https://script.google.com/macros/s/AKfycbzlYjcA3hFoxbLR700_eNeI7z1AquKdh70UVOISzhB4lhhkMoFHfwPMiXpTurK4BybY/exec",  // Apps Script /exec
-  token:  "CHANGE_ME_SUPER_SECRET",        // must match SHARED_TOKEN in Code.gs
+  apiUrl: "https://script.google.com/macros/s/AKfycbyAmmPxPjvt53B3EnpdeAQob9RWKjWzfjrP7Si-Zm9tBGTqxxd9NJKOHhoCDCHYOw-R/exec",  // Apps Script /exec
+  token:  "CHANGE_ME_SUPER_SECRET",        // must match SHARED_TOKEN
   storeId:     getParam('store')  || 'CL-Witbank-Highveld',
   deviceLabel: getParam('device') || 'Front Counter',
   deviceId:    getDeviceId()
 };
 
-/* ===== QUESTIONS (unchanged) ===== */
+/* ===== QUESTIONS (unchanged content) ===== */
 const QUESTIONS=[
   {id:'Q1',text:'Speed of service'},
   {id:'Q2',text:'Friendliness of staff'},
@@ -269,8 +207,7 @@ function makeQuestion(q){
   return card;
 }
 function render(){
-  const list=document.getElementById('qList');
-  list.innerHTML='';
+  const list=document.getElementById('qList');list.innerHTML='';
   QUESTIONS.forEach(q=>list.appendChild(makeQuestion(q)));
   document.getElementById('storeTag').textContent=`${CFG.storeId} • ${CFG.deviceLabel} • ${CFG.deviceId||'no deviceId'}`;
 }
@@ -349,12 +286,8 @@ document.getElementById('submitBtn').addEventListener('click',async()=>{
 function showThanks(){
   const el=document.getElementById('thanks');
   el.style.display='grid';
-  // Auto reset fast for next customer
   clearTimeout(el._t);
-  el._t=setTimeout(()=>{
-    el.style.display='none';
-    resetForm();
-  }, 1200); // ~1.2s
+  el._t=setTimeout(()=>{ el.style.display='none'; resetForm(); }, 1000); // faster reset
 }
 function resetForm(){
   document.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
@@ -363,7 +296,7 @@ function resetForm(){
   document.getElementById('mk').checked=false;
   updateSubmitState();
 }
-function toast(msg){const s=document.getElementById('statusTxt');if(!s)return;s.textContent=msg;clearTimeout(s._t);s._t=setTimeout(()=>s.textContent='',1800);}
+function toast(msg){const s=document.getElementById('statusTxt');if(!s)return;s.textContent=msg;clearTimeout(s._t);s._t=setTimeout(()=>s.textContent='',1600);}
 </script>
 </body>
 </html>
