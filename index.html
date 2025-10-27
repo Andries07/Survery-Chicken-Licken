@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+ <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Chicken Licken Feedback</title>
 
 <link rel="manifest" href="./manifest.json">
@@ -13,16 +14,26 @@
 <style>
   *,*::before,*::after{box-sizing:border-box}
   :root{
-    --card-rgba: rgba(255,255,255,0.78);
-    --field-rgba: rgba(255,255,255,0.9);
+    --bg:#ff6a00;
     --text:#111;
-    --green:#16a34a; --green2:#22c55e; --yellow:#facc15; --orange:#fb923c; --red:#dc2626;
+    --white: #fff;
+    --card-rgba: rgba(255,255,255,.9);
+    --shadow: 0 3px 10px rgba(0,0,0,.16), 0 12px 28px rgba(0,0,0,.18);
+    --green: #3ecf8e; --green2:#a5e5c3;
+    --yellow:#ffe365; --orange:#ff9f3c; --red:#ff5757;
   }
-  html,body{margin:0;height:100%;font-family:Arial,sans-serif;background:#000}
-
+  html,body{height:100%}
+  body{
+    margin:0;
+    font:15px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Noto Sans",sans-serif;
+    color:var(--text);
+    background:#000;
+  }
   .hero{
-    height:100dvh;
-    background-image:url('./background.jpg');
+    min-height:100%;
+    background:
+      linear-gradient( to bottom, rgba(0,0,0,.35), rgba(0,0,0,.4)),
+      url('./img/Final Image Background Orange.jpg');
     background-repeat:repeat;background-size:128px auto;background-position:top left;
     display:grid;place-items:start center;padding:8px 2vw 10px;
   }
@@ -37,11 +48,11 @@
 
   .content{min-height:0;overflow:hidden;display:grid;grid-template-rows:auto auto;gap:6px}
   .grid{display:grid;gap:6px}
-  .card{background:var(--card-rgba);border-radius:10px;padding:8px;box-shadow:0 6px 14px rgba(0,0,0,.22);backdrop-filter:saturate(120%) blur(2px)}
+  .card{background:var(--card-rgba);border-radius:10px;padding:8px;box-shadow:var(--shadow);-webkit-backdrop-filter:saturate(120%) blur(2px);backdrop-filter:saturate(120%) blur(2px)}
   .q-title{font-weight:900;font-size:15px;line-height:1.2;margin-bottom:4px;color:var(--text);letter-spacing:.2px}
 
   .q-row{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
-  .opt{display:grid;place-items:center;gap:2px;padding:7px;min-height:42px;border-radius:9px;color:#fff;font-weight:800;cursor:pointer;border:2px solid transparent;user-select:none}
+  .opt{display:grid;place-items:center;gap:2px;padding:7px;min-height:66px;color:#fff;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;border:2px solid transparent;user-select:none}
   .opt.active{outline:3px solid #000}
   .opt[data-score="5"]{background:var(--green)}
   .opt[data-score="4"]{background:var(--green2)}
@@ -53,19 +64,27 @@
 
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
   @media (max-width:640px){.grid2{grid-template-columns:1fr}}
-  input,textarea{width:100%;padding:7px;border:1.2px solid #ddd;border-radius:9px;font-size:13px;min-width:0;background:var(--field-rgba)}
-  textarea{min-height:54px;resize:vertical}
-  .tiny{font-size:11px;color:#444;margin-top:2px}
-  .error{outline:2px solid #dc2626}
 
-  .row-end{display:flex;justify-content:space-between;align-items:center;gap:6px}
-  .btn{background:#000;color:#fff;border:0;border-radius:10px;padding:9px 12px;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+  label{font-size:12px;font-weight:700;display:block;margin:2px 0 4px 2px}
+  input[type="text"], input[type="email"], textarea{
+    width:100%;border:2px solid #ddd;border-radius:10px;padding:9px 10px;font:14px/1.3 inherit
+  }
+  textarea{min-height:80px;resize:vertical}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .tiny{font-size:12px;opacity:.8}
+  .err{outline:3px solid #ff5757}
+
+  .footer{display:grid;grid-template-columns:1fr auto;align-items:center;color:#fff}
+  .btn{background:#000;color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.25)}
   .btn:disabled{opacity:.6;cursor:not-allowed}
   .muted{color:#ffffff;opacity:.9;font-size:12px;min-height:16px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 
   .thanks{display:none;position:fixed;inset:0;z-index:20;place-items:center}
-  .thanks::before{content:"";position:absolute;inset:0;background-image:url('./background.jpg');background-repeat:repeat;background-size:128px auto;opacity:.85}
-  .thanks .in{position:relative;background:#fff;padding:14px;border-radius:12px;text-align:center;width:min(320px,92vw);box-shadow:0 18px 54px rgba(0,0,0,.4)}
+  .thanks::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.66);backdrop-filter: blur(2px)}
+  .thanks::after{content:"";position:absolute;inset:0;background:
+    url('./img/Final Image Background Orange.jpg');
+    background-repeat:repeat;background-size:128px auto;opacity:.85}
+  .thanks .in{position:relative;background:#fff;padding:14px;border-radius:12px;text-align:center;font-weight:900;width:min(320px,92vw);box-shadow:0 18px 54px rgba(0,0,0,.4)}
 </style>
 </head>
 <body>
@@ -73,7 +92,7 @@
   if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()));}
   if('caches' in window){caches.keys().then(k=>k.forEach(c=>caches.delete(c)));}
 
-  (function(){const POLL=10*60*1000;function check(){fetch('./version.json?ts='+Date.now()).then(r=>r.json()).then(v=>{const cur=localStorage.getItem('appVersion');if(!cur)localStorage.setItem('appVersion',v.version);if(cur&&cur!==v.version){localStorage.setItem('appVersion',v.version);location.reload(true);}}).catch(()=>{});}try{check();setInterval(check,POLL);}catch(e){}})();
+  (function(){const POLL=10*60*1000;function check(){fetch('./version.json?ts='+Date.now()).then(r=>r.json()).then(v=>{const cur=localStorage.getItem('appVersion');localStorage.setItem('appVersion',v.version);if(cur&&cur!==v.version)location.reload(true);}).catch(()=>{});}try{check();setInterval(check,POLL);}catch(e){}})();
 </script>
 
 <div class="hero">
@@ -87,62 +106,144 @@
       <!-- OPTIONAL DETAILS (always visible) -->
       <div class="card">
         <h3 class="q-title" style="margin:0 0 4px">Optional details</h3>
-        <div class="tiny">If you add details, <b>Name</b>, <b>Surname</b> and a valid <b>10-digit Phone</b> are required and you must accept POPIA.</div>
+        <div class="tiny">If you add details, <b>Name</b>, <b>Surname</b>, and a valid <b>10-digit Phone</b> are required and you must accept POPIA.</div>
         <div class="grid2" style="margin-top:6px">
-          <div><input id="name" placeholder="Name" autocomplete="off" maxlength="50"></div>
-          <div><input id="surname" placeholder="Surname" autocomplete="off" maxlength="50"></div>
+          <div>
+            <label for="name">Name</label>
+            <input id="name" type="text" placeholder="e.g. Thabo">
+          </div>
+          <div>
+            <label for="surname">Surname</label>
+            <input id="surname" type="text" placeholder="e.g. Mokoena">
+          </div>
+          <div>
+            <label for="phone">Phone (10 digits)</label>
+            <input id="phone" type="text" inputmode="numeric" pattern="\d*" maxlength="10" placeholder="e.g. 0821234567">
+          </div>
+          <div>
+            <label for="email">Email (optional)</label>
+            <input id="email" type="email" placeholder="e.g. you@example.com">
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="feedback">Anything we should know?</label>
+            <textarea id="feedback" placeholder="Tell us what happened (optional)"></textarea>
+          </div>
         </div>
-        <div class="grid2" style="margin-top:6px">
-          <div><input id="phone" placeholder="Phone (10 digits)" maxlength="10" autocomplete="off"></div>
-          <div><input id="email" placeholder="Email (optional)" autocomplete="off"></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:6px">
+          <label class="tiny" style="display:flex;align-items:center;gap:8px;margin:0">
+            <input id="popia" type="checkbox"> I consent to the processing of my personal information (POPIA)
+          </label>
+          <label class="tiny" style="display:flex;align-items:center;gap:8px;margin:0 0 0 auto">
+            <input id="mk" type="checkbox"> OK to receive specials (optional)
+          </label>
         </div>
-        <div style="margin-top:6px">
-          <textarea id="feedback" placeholder="Additional feedback (optional)" autocomplete="off" maxlength="3000"></textarea>
-        </div>
-        <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:6px">
-          <input type="checkbox" id="popia" style="margin-top:3px">
-          <small>I consent to processing my personal info for service quality in line with POPIA.</small>
-        </label>
-        <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:4px">
-          <input type="checkbox" id="mk" style="margin-top:3px">
-          <small>I agree to receive promotions and can unsubscribe anytime.</small>
-        </label>
       </div>
     </div>
 
-    <!-- FOOTER -->
-    <div class="row-end">
-      <div class="muted" id="storeTag"></div>
+    <div class="footer">
       <div class="muted" id="statusTxt"></div>
-      <button class="btn" id="submitBtn" disabled>Submit</button>
+      <button id="submitBtn" class="btn" disabled>Submit feedback</button>
     </div>
   </div>
 </div>
 
-<!-- THANK YOU (auto close) -->
 <div class="thanks" id="thanks">
   <div class="in">
-    <h2 style="margin:0 0 6px">Thank you!</h2>
-    <p style="margin:0 0 6px">Your feedback was recorded.</p>
-    <div class="tiny">Ready for the next customer…</div>
+    <div style="font-size:28px;margin:8px 0 6px">Thank you! 🙌</div>
+    <div style="font-weight:700;color:#111">Your feedback helps us serve you better.</div>
   </div>
 </div>
 
 <script>
-/* ===== UTIL ===== */
-function normSpaces(s){return (s||'').replace(/\+/g,' ').trim();}
-function getParamAny(keys){const u=new URL(location.href);for(const k of keys){const v=u.searchParams.get(k);if(v)return normSpaces(v);}if(u.hash&&u.hash.includes('=')){const h=new URLSearchParams(u.hash.replace(/^#/,''));for(const k of keys){const v=h.get(k);if(v)return normSpaces(v);}}return '';}
-function getParam(k){const u=new URL(location.href);return normSpaces(u.searchParams.get(k));}
-function getDeviceId(){const keys=['deviceId','deviceid','did','DeviceId','DEVICEID'];let v=getParamAny(keys);if(v){localStorage.setItem('cl_deviceId',v);return v;}v=localStorage.getItem('cl_deviceId')||'';if(v)return v;v=(prompt('Enter device ID (e.g. A9-Front-01)')||'').trim();if(v)localStorage.setItem('cl_deviceId',v);return v;}
+/* ===== UTILS ===== */
+function getParam(k){const u=new URL(location.href);return u.searchParams.get(k);}
+function markError(id,yes){const el=document.getElementById(id);if(!el)return;el.classList.toggle('err',!!yes);}
+function val(id){const el=document.getElementById(id);return el?el.value.trim():'';}
+function allAnswered(){return [...document.querySelectorAll('.q-row')].every(row=>row.querySelector('.opt.active'))}
+function detailsAnyFilled(){return ['name','surname','phone','email','feedback'].some(id=>val(id))}
+
+/* ===== DEVICE ID (stable per browser) ===== */
+function getDeviceId(){
+  let v=localStorage.getItem('cl_deviceId')||'';if(v)return v;v=(prompt('Enter a Device ID or label for this tablet (e.g. FRONT-COUNTER).','')||'').trim();if(v)localStorage.setItem('cl_deviceId',v);return v;
+}
 
 /* ===== CONFIG (SET THESE) ===== */
 const CFG = {
-  apiUrl: "https://script.google.com/macros/s/AKfycby87VdqHo2AO_-sga9BgXHWAzoKoQ3M11u0fFrv_6PpMgvT8CYpQ6iYEWap_1OQoFxC/exec",  // Apps Script /exec
+  apiUrl: "https://script.google.com/macros/s/AKfycbwABZyCXqBnoEId0M_0mZ9u-XjTtCmn7zAw8tQCRu1NVTBBaqK4_Wmw5UGoANk4Q-Rn/exec",  // Apps Script /exec
   token:  "CHANGE_ME_SUPER_SECRET",        // must match SHARED_TOKEN
   storeId:     getParam('store')  || 'CL-Witbank-Highveld',
   deviceLabel: getParam('device') || 'Front Counter',
   deviceId:    getDeviceId()
 };
+
+/* ===== INSTANT SUBMIT WRAPPER & IDEMPOTENCY ===== */
+let CL_BLOCKING=false;
+function uuid(){
+  try{ return crypto.randomUUID(); }catch(e){
+    return 'sub-'+Date.now()+'-'+Math.random().toString(16).slice(2);
+  }
+}
+const MIN_THANKYOU_MS = 3000;
+
+async function sendJSON(url, payload){
+  try{
+    await fetch(url, {
+      method:'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CL-Token': CFG.token },
+      body: JSON.stringify(payload),
+      keepalive: true,
+      cache: 'no-store',
+      mode: 'cors',
+      redirect: 'follow'
+    });
+    return true;
+  }catch(e){ return false; }
+}
+
+async function sendPlain(url, payload){
+  try{
+    await fetch(url, {
+      method:'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8', 'X-CL-Token': CFG.token },
+      body: JSON.stringify(payload),
+      keepalive: true,
+      mode: 'no-cors'
+    });
+    return true;
+  }catch(e){ return false; }
+}
+
+function sendBeacon(url, payload){
+  try{
+    const blob = new Blob([JSON.stringify(payload)], {type:'text/plain;charset=utf-8'});
+    navigator.sendBeacon(url, blob);
+    return true;
+  }catch(e){ return false; }
+}
+
+async function CL_SUBMIT_SURVEY(payload){
+  if (CL_BLOCKING) return;
+  CL_BLOCKING = true;
+
+  // Add ids + timestamps
+  payload.submissionId = uuid();
+  payload.pressedAtUtc = new Date().toISOString();
+
+  const started = Date.now();
+  showThanks(); // instant UX
+
+  // try JSON first, then plain/no-cors, then beacon
+  let ok = await sendJSON(CFG.apiUrl, payload);
+  if (!ok) ok = await sendPlain(CFG.apiUrl, payload);
+  if (!ok) ok = sendBeacon(CFG.apiUrl, payload);
+
+  // local 24h guard marking (by phone/email) regardless of network ok
+  dupLocalMark();
+
+  const elapsed = Date.now() - started;
+  const wait = Math.max(0, MIN_THANKYOU_MS - elapsed);
+  setTimeout(()=>{ CL_BLOCKING=false; resetForm(); }, wait);
+}
 
 /* ===== QUESTIONS ===== */
 const QUESTIONS=[
@@ -178,18 +279,9 @@ function makeQuestion(q){
   card.appendChild(title);card.appendChild(row);
   return card;
 }
-function render(){
-  const list=document.getElementById('qList');list.innerHTML='';
-  QUESTIONS.forEach(q=>list.appendChild(makeQuestion(q)));
-  document.getElementById('storeTag').textContent=`${CFG.storeId} • ${CFG.deviceLabel} • ${CFG.deviceId||'no deviceId'}`;
-}
-render();
+document.getElementById('qList').append(...QUESTIONS.map(makeQuestion));
 
 /* ===== VALIDATION ===== */
-function val(id){return(document.getElementById(id).value||'').trim();}
-function detailsAnyFilled(){return!!(val('name')||val('surname')||val('phone')||val('email')||val('feedback'));}
-function allAnswered(){return QUESTIONS.every(q=>document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`));}
-function markError(id,on){const el=document.getElementById(id);if(el)el.classList.toggle('error',!!on);}
 function updateSubmitState(){
   let ok=allAnswered();
   const any=detailsAnyFilled();
@@ -224,7 +316,8 @@ function dupLocalMark(){
 }
 
 /* ===== SUBMIT ===== */
-document.getElementById('submitBtn').addEventListener('click',async()=>{
+document.getElementById('submitBtn').addEventListener('click',()=>{
+  if (CL_BLOCKING) return;
   if(!allAnswered()){toast('Please answer all questions');return;}
   const any=detailsAnyFilled();
   if(any){
@@ -234,8 +327,6 @@ document.getElementById('submitBtn').addEventListener('click',async()=>{
     if(!document.getElementById('popia').checked){toast('Tick POPIA consent');return;}
   }
   const em=val('email');if(em&&!/.+@.+\..+/.test(em)){toast('Enter a valid Email');return;}
-
-  // Local dup guard (UI feedback); server also enforces
   if(dupLocalBlockIfAny()){ toast('You have already submitted in the last 24 hours.'); return; }
 
   const answers=QUESTIONS.map(q=>{
@@ -249,7 +340,8 @@ document.getElementById('submitBtn').addEventListener('click',async()=>{
     token:CFG.token,
     clientId:`${Date.now()}-${Math.random().toString(16).slice(2)}`,
     storeId:CFG.storeId,deviceLabel:CFG.deviceLabel,deviceId:CFG.deviceId,
-    pressedAtUtc:new Date().toISOString(),answers,
+    // pressedAtUtc is added in CL_SUBMIT_SURVEY
+    answers,
     marketingConsent:document.getElementById('mk').checked===true,
     customer:{
       name:val('name'),surname:val('surname'),phone:val('phone'),
@@ -258,25 +350,8 @@ document.getElementById('submitBtn').addEventListener('click',async()=>{
     }
   };
 
-  const bodyStr = JSON.stringify(payload);
-
-  try{
-    await fetch(CFG.apiUrl,{ method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:bodyStr, keepalive:true });
-    dupLocalMark();
-    showThanks(); return;
-  }catch(e){}
-
-  try{
-    navigator.sendBeacon(CFG.apiUrl, new Blob([bodyStr], {type:'text/plain;charset=utf-8'}));
-    dupLocalMark();
-    showThanks(); return;
-  }catch(e2){
-    toast('Network error');
-  }
+  CL_SUBMIT_SURVEY(payload);
 });
-
 function showThanks(){
   const el=document.getElementById('thanks');
   el.style.display='grid';
@@ -290,7 +365,7 @@ function resetForm(){
   document.getElementById('mk').checked=false;
   updateSubmitState();
 }
-function toast(msg){const s=document.getElementById('statusTxt');if(!s)return;s.textContent=msg;clearTimeout(s._t);s._t=setTimeout(()=>s.textContent='',1600);}
+function toast(msg){const s=document.getElementById('statusTxt');s.textContent=msg;clearTimeout(s._t);s._t=setTimeout(()=>s.textContent='',1600);}
 </script>
 </body>
 </html>
