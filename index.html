@@ -1,387 +1,296 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Chicken Licken • Quick Feedback</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="color-scheme" content="light" />
-  <style>
-    :root{
-      --orange:#ff6900; --green:#2db355; --yellow:#f7c948; --red:#e64b3c; --grey:#e9ecef; --ink:#111; --ink-2:#333;
-      --bg:#faf6f2;
-      --card-bg: rgba(255,255,255,0.90);
-      --btn-h: 56px;  /* button height */
-      --gap: 12px;
-      --radius: 14px;
-      --maxw: 760px;  /* good for 8.7" portrait */
-    }
-    *{ box-sizing:border-box; touch-action:manipulation; }
-    html,body{ height:100%; }
-    body{
-      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--ink); background:var(--bg);
-      background-image:
-        radial-gradient(rgba(255,105,0,.06) 1px, transparent 1px),
-        radial-gradient(rgba(255,105,0,.05) 1px, transparent 1px);
-      background-position: 0 0, 16px 16px;
-      background-size: 32px 32px;
-    }
-    .wrap{
-      min-height:100%;
-      display:flex; align-items:center; justify-content:center; padding:16px;
-    }
-    .card{
-      width:100%; max-width:var(--maxw);
-      background:var(--card-bg); backdrop-filter:saturate(1.1) blur(2px);
-      border-radius:var(--radius); border:1px solid rgba(0,0,0,.06);
-      box-shadow: 0 10px 28px rgba(0,0,0,.08);
-      padding: clamp(12px, 2.5vw, 20px);
-    }
-    .header{
-      display:flex; align-items:center; gap:12px; margin-bottom:10px;
-    }
-    .logo{ width:44px; height:44px; border-radius:10px; background:var(--orange); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; }
-    .title{ font-size: clamp(18px, 4vw, 26px); font-weight:900; line-height:1.1; color:#fff;
-      text-shadow: 0 1px 0 rgba(0,0,0,.35); }
-    .title-wrap{
-      width:100%; background:linear-gradient(90deg, var(--orange), #ff8c33);
-      padding:10px 12px; border-radius:12px; margin-bottom:14px; display:flex; align-items:center; gap:10px;
-    }
-    .meta{ font-size:12px; color:#555; margin:6px 0 0; }
-    .q{
-      margin-top:14px; padding:10px; border-radius:12px; background:#fff; border:1px solid rgba(0,0,0,.06);
-    }
-    .q h3{
-      margin:0 0 10px; font-size: clamp(15px, 3.5vw, 18px); font-weight:800; color:var(--ink-2);
-    }
-    .row{
-      display:grid; grid-template-columns: repeat(5, 1fr); gap:10px;
-    }
-    .btn{
-      height:var(--btn-h); border-radius:12px; border:2px solid transparent; font-weight:800; font-size: clamp(14px, 3.5vw, 16px);
-      display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; user-select:none;
-      transition: transform .05s ease, box-shadow .1s ease, border-color .15s ease;
-      background:#f5f5f5; color:#111;
-    }
-    .btn .emo{ font-size: 1.25em; }
-    .btn:hover{ border-color:#000; }
-    .btn:active{ transform: translateY(1px); }
-    .btn.sel{ box-shadow: 0 0 0 3px rgba(0,0,0,.10) inset; border-color:#000; }
-    .btn.green{ background:#eaf7ef; }
-    .btn.yellow{ background:#fff7df; }
-    .btn.avg{ background:#eef1f4; }
-    .btn.red{ background:#fdebea; }
-    .btn.good{ background:#e9f7ff; }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<title>Chicken Licken Feedback</title>
 
-    .opt{
-      margin-top:14px; padding:12px; border-radius:12px; background:#fff; border:1px solid rgba(0,0,0,.06);
-    }
-    .opt h4{ margin:0 0 10px; font-size: clamp(14px, 3.2vw, 16px); font-weight:900; }
-    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .grid1{ display:grid; grid-template-columns:1fr; gap:10px; }
-    label{ font-size:12px; color:#444; font-weight:700; display:block; margin-bottom:6px;}
-    input, textarea{
-      width:100%; padding:12px 12px; border-radius:10px; border:1px solid #d9dde3; font-size:16px;
-      background:#fbfbfc;
-    }
-    textarea{ min-height: 96px; resize: none; }
-    .checks{ margin-top:6px; display:grid; gap:8px; }
-    .ck{ display:flex; align-items:flex-start; gap:8px; }
-    .ck input{ width:20px; height:20px; margin-top:2px; }
-    .ck span{ font-size:12px; color:#333; line-height:1.35; }
-    .actions{
-      display:flex; align-items:center; gap:10px; margin-top:14px;
-    }
-    .submit{
-      appearance:none; border:none; border-radius:12px; background:#111; color:#fff; font-weight:900;
-      padding:14px 18px; font-size: clamp(16px, 3.8vw, 18px); cursor:pointer;
-      flex: 1 1 auto;
-    }
-    .submit.is-disabled{ opacity:.6; pointer-events:none; }
-    .note{ font-size:12px; color:#666; }
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png">
 
-    /* Thank-you overlay */
-    .ty{
-      position:fixed; inset:0; background:rgba(0,0,0,.55);
-      display:none; align-items:center; justify-content:center; z-index:99;
-    }
-    .ty .inner{
-      width:min(88vw, 560px); background:#fff; border-radius:16px; padding:22px; text-align:center;
-      border:1px solid rgba(255,255,255,.6);
-    }
-    .ty h2{ margin:0 0 8px; font-size: clamp(18px, 4.5vw, 24px); font-weight:900; }
-    .ty p{ margin:0; color:#444; }
-    .store-pill{
-      display:inline-block; font-size:12px; background:#ffe7d6; color:#111; padding:4px 8px; border-radius:999px; margin-left:6px;
-      border:1px solid rgba(0,0,0,.05);
-    }
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  :root{
+    --card-rgba: rgba(255,255,255,0.78);
+    --field-rgba: rgba(255,255,255,0.9);
+    --text:#111;
+    --green:#16a34a; --green2:#22c55e; --yellow:#facc15; --orange:#fb923c; --red:#dc2626;
+  }
+  html,body{margin:0;height:100%;font-family:Arial,sans-serif;background:#000}
 
-    /* Responsive */
-    @media (max-width:520px){
-      :root{ --btn-h: 52px; --maxw: 640px; }
-      .grid2{ grid-template-columns:1fr; }
-      .row{ grid-template-columns: 1fr 1fr; }
-    }
-  </style>
+  .hero{
+    height:100dvh;
+    background-image:url('./background.jpg');
+    background-repeat:repeat;background-size:128px auto;background-position:top left;
+    display:grid;place-items:start center;padding:8px 2vw 10px;
+  }
+  .wrap{
+    width:min(760px,96vw);height:100%;
+    display:grid;grid-template-rows:auto 1fr auto;gap:6px;
+  }
+  h1{
+    margin:0;text-align:center;color:#fff;font-weight:900;font-size:20px;line-height:1.1;
+    text-shadow:0 2px 8px rgba(0,0,0,.55);
+  }
+
+  .content{min-height:0;overflow:hidden;display:grid;grid-template-rows:auto auto;gap:6px}
+  .grid{display:grid;gap:6px}
+  .card{background:var(--card-rgba);border-radius:10px;padding:8px;box-shadow:0 6px 14px rgba(0,0,0,.22);backdrop-filter:saturate(120%) blur(2px)}
+  .q-title{font-weight:900;font-size:15px;line-height:1.2;margin-bottom:4px;color:var(--text);letter-spacing:.2px}
+
+  .q-row{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+  .opt{display:grid;place-items:center;gap:2px;padding:7px;min-height:42px;border-radius:9px;color:#fff;font-weight:800;cursor:pointer;border:2px solid transparent;user-select:none}
+  .opt.active{outline:3px solid #000}
+  .opt[data-score="5"]{background:var(--green)}
+  .opt[data-score="4"]{background:var(--green2)}
+  .opt[data-score="3"]{background:var(--yellow);color:#111}
+  .opt[data-score="2"]{background:var(--orange)}
+  .opt[data-score="1"]{background:var(--red)}
+  .emo{font-size:17px}
+  .lbl{font-size:11px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  @media (max-width:640px){.grid2{grid-template-columns:1fr}}
+  input,textarea{width:100%;padding:7px;border:1.2px solid #ddd;border-radius:9px;font-size:13px;min-width:0;background:var(--field-rgba)}
+  textarea{min-height:54px;resize:vertical}
+  .tiny{font-size:11px;color:#444;margin-top:2px}
+  .error{outline:2px solid #dc2626}
+
+  .row-end{display:flex;justify-content:space-between;align-items:center;gap:6px}
+  .btn{background:#000;color:#fff;border:0;border-radius:10px;padding:9px 12px;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .muted{color:#ffffff;opacity:.9;font-size:12px;min-height:16px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+
+  .thanks{display:none;position:fixed;inset:0;z-index:20;place-items:center}
+  .thanks::before{content:"";position:absolute;inset:0;background-image:url('./background.jpg');background-repeat:repeat;background-size:128px auto;opacity:.85}
+  .thanks .in{position:relative;background:#fff;padding:14px;border-radius:12px;text-align:center;width:min(320px,92vw);box-shadow:0 18px 54px rgba(0,0,0,.4)}
+</style>
 </head>
 <body>
+<script>
+  if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()));}
+  if('caches' in window){caches.keys().then(k=>k.forEach(c=>caches.delete(c)));}
+
+  (function(){const POLL=10*60*1000;function check(){fetch('./version.json?ts='+Date.now()).then(r=>r.json()).then(v=>{const cur=localStorage.getItem('appVersion');if(!cur)localStorage.setItem('appVersion',v.version);if(cur&&cur!==v.version){localStorage.setItem('appVersion',v.version);location.reload(true);}}).catch(()=>{});}try{check();setInterval(check,POLL);}catch(e){}})();
+</script>
+
+<div class="hero">
   <div class="wrap">
-    <div class="card">
-      <div class="title-wrap">
-        <div class="logo">CL</div>
-        <div class="title">Chicken Licken • Quick Feedback</div>
-      </div>
-      <div class="meta" id="metaLine">Store: — • Device: —</div>
+    <h1>Chicken Licken Quick Feedback</h1>
 
-      <!-- Questions -->
-      <div id="qs"></div>
+    <div class="content">
+      <!-- QUESTIONS -->
+      <div id="qList" class="grid"></div>
 
-      <!-- Optional details -->
-      <div class="opt" id="optBox">
-        <h4>Optional details (helps us contact you)</h4>
-        <div class="grid2">
-          <div>
-            <label for="name">Name (max 50)</label>
-            <input id="name" maxlength="50" autocomplete="given-name" />
-          </div>
-          <div>
-            <label for="surname">Surname (max 50)</label>
-            <input id="surname" maxlength="50" autocomplete="family-name" />
-          </div>
+      <!-- OPTIONAL DETAILS (always visible) -->
+      <div class="card">
+        <h3 class="q-title" style="margin:0 0 4px">Optional details</h3>
+        <div class="tiny">If you add details, <b>Name</b>, <b>Surname</b> and a valid <b>10-digit Phone</b> are required and you must accept POPIA.</div>
+        <div class="grid2" style="margin-top:6px">
+          <div><input id="name" placeholder="Name" autocomplete="off" maxlength="50"></div>
+          <div><input id="surname" placeholder="Surname" autocomplete="off" maxlength="50"></div>
         </div>
-        <div class="grid2">
-          <div>
-            <label for="phone">Phone (10 digits)</label>
-            <input id="phone" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" autocomplete="tel" />
-          </div>
-          <div>
-            <label for="email">Email</label>
-            <input id="email" type="email" inputmode="email" autocomplete="email" />
-          </div>
+        <div class="grid2" style="margin-top:6px">
+          <div><input id="phone" placeholder="Phone (10 digits)" maxlength="10" autocomplete="off"></div>
+          <div><input id="email" placeholder="Email (optional)" autocomplete="off"></div>
         </div>
-        <div class="grid1">
-          <div>
-            <label for="feedback">Additional feedback (max 3000)</label>
-            <textarea id="feedback" maxlength="3000" placeholder="Tell us what went well, or what we can improve…"></textarea>
-          </div>
+        <div style="margin-top:6px">
+          <textarea id="feedback" placeholder="Additional feedback (optional)" autocomplete="off" maxlength="3000"></textarea>
         </div>
-        <div class="checks">
-          <label class="ck">
-            <input id="popia" type="checkbox" />
-            <span>
-              I understand and consent per the POPIA. If I provide my details, I agree that they may be used to contact me about this feedback. I also accept that anonymised data may be used to improve service quality.
-            </span>
-          </label>
-          <label class="ck">
-            <input id="mk" type="checkbox" />
-            <span>
-              I agree to receive marketing news and promotions from Chicken Licken for this store. I can opt out at any time.
-            </span>
-          </label>
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="actions">
-        <button id="submitBtn" class="submit">Submit</button>
-        <div class="note">Takes a few seconds — please wait for the thank-you.</div>
+        <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:6px">
+          <input type="checkbox" id="popia" style="margin-top:3px">
+          <small>I consent to processing my personal info for service quality in line with POPIA.</small>
+        </label>
+        <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:4px">
+          <input type="checkbox" id="mk" style="margin-top:3px">
+          <small>I agree to receive promotions and can unsubscribe anytime.</small>
+        </label>
       </div>
     </div>
-  </div>
 
-  <!-- Thank-you -->
-  <div class="ty" id="thankyou">
-    <div class="inner">
-      <h2>Thank you! 🙌</h2>
-      <p>Your feedback helps us serve you better.<span id="tyStore" class="store-pill"></span></p>
+    <!-- FOOTER -->
+    <div class="row-end">
+      <div class="muted" id="storeTag"></div>
+      <div class="muted" id="statusTxt"></div>
+      <button class="btn" id="submitBtn" disabled>Submit</button>
     </div>
   </div>
+</div>
 
-  <script>
-  /* ===================== CONFIG ===================== */
-  const CFG = {
-    apiUrl: 'https://script.google.com/macros/s/AKfycbza89rJkHgT5uxvFnixlxjoyNkdU6zu6dxg7zVAXNzvyRy94BABknWocL9TnvcBRnU/exec', // <-- paste your Apps Script Web App URL (/exec)
-    token:  'CHANGE_ME_SUPER_SECRET',                                           // <-- must match Apps Script
-    // Defaults (can be overridden by URL params)
-    storeId:     'CL-Witbank-Highveld',
-    deviceLabel: 'Front Counter',
-    deviceId:    'A9-QR',
-    THANKYOU_MS: 3000  // how long the thank-you overlay shows
+<!-- THANK YOU (auto close) -->
+<div class="thanks" id="thanks">
+  <div class="in">
+    <h2 style="margin:0 0 6px">Thank you!</h2>
+    <p style="margin:0 0 6px">Your feedback was recorded.</p>
+    <div class="tiny">Ready for the next customer…</div>
+  </div>
+</div>
+
+<script>
+/* ===== UTIL ===== */
+function normSpaces(s){return (s||'').replace(/\+/g,' ').trim();}
+function getParamAny(keys){const u=new URL(location.href);for(const k of keys){const v=u.searchParams.get(k);if(v)return normSpaces(v);}if(u.hash&&u.hash.includes('=')){const h=new URLSearchParams(u.hash.replace(/^#/,''));for(const k of keys){const v=h.get(k);if(v)return normSpaces(v);}}return '';}
+function getParam(k){const u=new URL(location.href);return normSpaces(u.searchParams.get(k));}
+function getDeviceId(){const keys=['deviceId','deviceid','did','DeviceId','DEVICEID'];let v=getParamAny(keys);if(v){localStorage.setItem('cl_deviceId',v);return v;}v=localStorage.getItem('cl_deviceId')||'';if(v)return v;v=(prompt('Enter device ID (e.g. A9-Front-01)')||'').trim();if(v)localStorage.setItem('cl_deviceId',v);return v;}
+
+/* ===== CONFIG (SET THESE) ===== */
+const CFG = {
+  apiUrl: "https://script.google.com/macros/s/AKfycby87VdqHo2AO_-sga9BgXHWAzoKoQ3M11u0fFrv_6PpMgvT8CYpQ6iYEWap_1OQoFxC/exec",  // Apps Script /exec
+  token:  "CHANGE_ME_SUPER_SECRET",        // must match SHARED_TOKEN
+  storeId:     getParam('store')  || 'CL-Witbank-Highveld',
+  deviceLabel: getParam('device') || 'Front Counter',
+  deviceId:    getDeviceId()
+};
+
+/* ===== QUESTIONS ===== */
+const QUESTIONS=[
+  {id:'Q1',text:'Speed of service'},
+  {id:'Q2',text:'Friendliness of staff'},
+  {id:'Q3',text:'Order accuracy'},
+  {id:'Q4',text:'Cleanliness of store'},
+  {id:'Q5',text:'Overall experience'}
+];
+const CHOICES=[
+  {txt:'Excellent',score:5,emo:'😄'},
+  {txt:'Good',     score:4,emo:'🙂'},
+  {txt:'Average',  score:3,emo:'😐'},
+  {txt:'Poor',     score:2,emo:'🙁'},
+  {txt:'Bad',      score:1,emo:'😡'}
+];
+
+/* ===== RENDER ===== */
+function makeQuestion(q){
+  const card=document.createElement('div');card.className='card';
+  const title=document.createElement('div');title.className='q-title';title.textContent=q.text;
+  const row=document.createElement('div');row.className='q-row';row.dataset.qid=q.id;
+  CHOICES.forEach(c=>{
+    const d=document.createElement('div');
+    d.className='opt';d.dataset.score=c.score;
+    d.innerHTML=`<div class="emo">${c.emo}</div><div class="lbl">${c.txt}</div>`;
+    d.addEventListener('click',()=>{
+      row.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
+      d.classList.add('active');updateSubmitState();
+    });
+    row.appendChild(d);
+  });
+  card.appendChild(title);card.appendChild(row);
+  return card;
+}
+function render(){
+  const list=document.getElementById('qList');list.innerHTML='';
+  QUESTIONS.forEach(q=>list.appendChild(makeQuestion(q)));
+  document.getElementById('storeTag').textContent=`${CFG.storeId} • ${CFG.deviceLabel} • ${CFG.deviceId||'no deviceId'}`;
+}
+render();
+
+/* ===== VALIDATION ===== */
+function val(id){return(document.getElementById(id).value||'').trim();}
+function detailsAnyFilled(){return!!(val('name')||val('surname')||val('phone')||val('email')||val('feedback'));}
+function allAnswered(){return QUESTIONS.every(q=>document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`));}
+function markError(id,on){const el=document.getElementById(id);if(el)el.classList.toggle('error',!!on);}
+function updateSubmitState(){
+  let ok=allAnswered();
+  const any=detailsAnyFilled();
+  const requireName=any&&!val('name');
+  const requireSurname=any&&!val('surname');
+  const phoneVal=val('phone');
+  const requirePhone=any&&!/^\d{10}$/.test(phoneVal);
+  const requirePOPIA=any&&!document.getElementById('popia').checked;
+  const em=val('email');
+  const badEmail=em&&!/.+@.+\..+/.test(em);
+  markError('name',requireName);markError('surname',requireSurname);markError('phone',requirePhone);
+  if(requireName||requireSurname||requirePhone||requirePOPIA||badEmail)ok=false;
+  document.getElementById('submitBtn').disabled=!ok;
+}
+document.addEventListener('input',updateSubmitState);
+
+/* ===== LIGHT CLIENT DUP GUARD (local) ===== */
+function within24h(ts){return (Date.now() - Number(ts)) < 24*60*60*1000;}
+function dupLocalBlockIfAny(){
+  const phone=val('phone'); const email=(val('email')||'').toLowerCase();
+  if(!phone && !email) return false;
+  const kP = phone ? `cl_last_phone_${phone}` : null;
+  const kE = email ? `cl_last_email_${email}` : null;
+  if(kP && localStorage.getItem(kP) && within24h(localStorage.getItem(kP))) return true;
+  if(kE && localStorage.getItem(kE) && within24h(localStorage.getItem(kE))) return true;
+  return false;
+}
+function dupLocalMark(){
+  const phone=val('phone'); const email=(val('email')||'').toLowerCase();
+  if(phone) localStorage.setItem(`cl_last_phone_${phone}`, String(Date.now()));
+  if(email) localStorage.setItem(`cl_last_email_${email}`, String(Date.now()));
+}
+
+/* ===== SUBMIT ===== */
+document.getElementById('submitBtn').addEventListener('click',async()=>{
+  if(!allAnswered()){toast('Please answer all questions');return;}
+  const any=detailsAnyFilled();
+  if(any){
+    if(!val('name')){toast('Please enter your Name');return;}
+    if(!val('surname')){toast('Please enter your Surname');return;}
+    const ph=val('phone');if(!/^\d{10}$/.test(ph)){toast('Enter a valid 10-digit Phone');return;}
+    if(!document.getElementById('popia').checked){toast('Tick POPIA consent');return;}
+  }
+  const em=val('email');if(em&&!/.+@.+\..+/.test(em)){toast('Enter a valid Email');return;}
+
+  // Local dup guard (UI feedback); server also enforces
+  if(dupLocalBlockIfAny()){ toast('You have already submitted in the last 24 hours.'); return; }
+
+  const answers=QUESTIONS.map(q=>{
+    const el=document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`);
+    const score=Number(el.dataset.score);
+    const ch=CHOICES.find(c=>c.score===score);
+    return{questionId:q.text,choiceText:ch.txt,choiceScore:score};
+  });
+
+  const payload={
+    token:CFG.token,
+    clientId:`${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    storeId:CFG.storeId,deviceLabel:CFG.deviceLabel,deviceId:CFG.deviceId,
+    pressedAtUtc:new Date().toISOString(),answers,
+    marketingConsent:document.getElementById('mk').checked===true,
+    customer:{
+      name:val('name'),surname:val('surname'),phone:val('phone'),
+      email:val('email'),feedback:val('feedback'),
+      consent:document.getElementById('popia').checked||null
+    }
   };
 
-  /* ===================== UTILITIES ===================== */
-  function qs(p){ return new URLSearchParams(location.search).get(p) || ''; }
-  function applyUrlDefaults(){
-    const s = qs('store');      if (s) CFG.storeId = s;
-    const d = qs('device');     if (d) CFG.deviceLabel = d.replaceAll('+',' ');
-    const did= qs('deviceId');  if (did) CFG.deviceId = did;
-    const v = document.getElementById('metaLine');
-    if (v) v.textContent = `Store: ${CFG.storeId} • Device: ${CFG.deviceLabel}`;
-    const ty = document.getElementById('tyStore');
-    if (ty) ty.textContent = ` ${CFG.storeId}`;
+  const bodyStr = JSON.stringify(payload);
+
+  try{
+    await fetch(CFG.apiUrl,{ method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:bodyStr, keepalive:true });
+    dupLocalMark();
+    showThanks(); return;
+  }catch(e){}
+
+  try{
+    navigator.sendBeacon(CFG.apiUrl, new Blob([bodyStr], {type:'text/plain;charset=utf-8'}));
+    dupLocalMark();
+    showThanks(); return;
+  }catch(e2){
+    toast('Network error');
   }
-  function val(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
+});
 
-  // per-device anonymous ID (for server 24h rule)
-  function getOrMakeAnonId(){
-    let id = localStorage.getItem('cl_anon_id');
-    if (!id){ id = 'a9_' + Math.random().toString(36).slice(2,14); localStorage.setItem('cl_anon_id', id); }
-    return id;
-  }
-  const ANON_ID = getOrMakeAnonId();
-
-  /* ===================== QUESTIONS ===================== */
-  const QUESTIONS = [
-    { id:'Q1', text:'How was the speed of service?' },
-    { id:'Q2', text:'How friendly & helpful were our staff?' },
-    { id:'Q3', text:'How was your order accuracy?' },
-    { id:'Q4', text:'How clean was the store?' },
-    { id:'Q5', text:'Overall, how was your experience?' }
-  ];
-  const CHOICES = [
-    { label:'Poor',      score:1, cls:'red',    emo:'😡' },
-    { label:'Bad',       score:2, cls:'red',    emo:'😠' },
-    { label:'Average',   score:3, cls:'avg',    emo:'😐' },
-    { label:'Good',      score:4, cls:'green',  emo:'🙂' },
-    { label:'Excellent', score:5, cls:'green',  emo:'🤩' }
-  ];
-
-  function renderQuestions(){
-    const host = document.getElementById('qs');
-    host.innerHTML = '';
-    QUESTIONS.forEach(q=>{
-      const sec = document.createElement('div');
-      sec.className = 'q';
-      const h = document.createElement('h3');
-      h.textContent = q.text;
-      sec.appendChild(h);
-
-      const row = document.createElement('div');
-      row.className = 'row';
-      CHOICES.forEach(ch=>{
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = `btn ${ch.cls}`;
-        b.dataset.qid = q.id;
-        b.dataset.label = ch.label;
-        b.dataset.score = String(ch.score);
-        b.innerHTML = `<span class="emo">${ch.emo}</span> ${ch.label}`;
-        b.addEventListener('click', ()=>selectChoice(q.id, b));
-        row.appendChild(b);
-      });
-      sec.appendChild(row);
-      host.appendChild(sec);
-    });
-  }
-
-  function selectChoice(qid, btn){
-    // unselect siblings
-    const siblings = btn.parentElement.querySelectorAll('.btn');
-    siblings.forEach(x=>x.classList.remove('sel'));
-    btn.classList.add('sel');
-  }
-
-  function buildAnswers(){
-    return QUESTIONS.map(q=>{
-      const chosen = document.querySelector(`.q .row .btn.sel[data-qid="${q.id}"]`);
-      if (!chosen) throw new Error('Please answer all questions before submitting.');
-      return {
-        questionId: q.id,
-        choiceText: chosen.dataset.label,
-        choiceScore: Number(chosen.dataset.score)
-      };
-    });
-  }
-
-  function resetSurvey(){
-    // clear selections & inputs (ready for next customer)
-    document.querySelectorAll('.btn.sel').forEach(b=>b.classList.remove('sel'));
-    ['name','surname','phone','email','feedback'].forEach(id=>{
-      const el = document.getElementById(id); if (el) el.value = '';
-    });
-    ['popia','mk'].forEach(id=>{
-      const el = document.getElementById(id); if (el) el.checked = false;
-    });
-  }
-
-  /* ===================== THANK-YOU / SUBMIT ===================== */
-  let SUBMITTING = false;
-  function lockUI(){
-    const btn = document.getElementById('submitBtn');
-    if (btn){ btn.disabled = true; btn.classList.add('is-disabled'); }
-  }
-  function unlockUI(){
-    const btn = document.getElementById('submitBtn');
-    if (btn){ btn.disabled = false; btn.classList.remove('is-disabled'); }
-  }
-  function showThankYou(){ const el=document.getElementById('thankyou'); if (el) el.style.display='flex'; }
-  function hideThankYou(){ const el=document.getElementById('thankyou'); if (el) el.style.display='none'; }
-  function newClientId(){ return `${Date.now()}-${Math.random().toString(16).slice(2)}`; }
-
-  async function submitSurvey(){
-    if (SUBMITTING) return;
-    SUBMITTING = true; lockUI();
-
-    let answers;
-    try{
-      answers = buildAnswers();
-    }catch(e){
-      SUBMITTING = false; unlockUI();
-      alert(e.message || 'Please answer all questions.'); return;
-    }
-
-    // OPTIONAL field validation
-    const email = val('email'); const phone = val('phone');
-    if (email && !/.+@.+\..+/.test(email)){ SUBMITTING=false; unlockUI(); alert('Please enter a valid email.'); return; }
-    if (phone && !/^\d{10}$/.test(phone)){ SUBMITTING=false; unlockUI(); alert('Phone must be 10 digits.'); return; }
-
-    const payload = {
-      token: CFG.token,
-      clientId: newClientId(),                               // server debounces duplicates for 5 minutes
-      storeId: CFG.storeId,
-      deviceLabel: CFG.deviceLabel,
-      deviceId: CFG.deviceId,
-      pressedAtUtc: new Date().toISOString(),                // server stores SAST for PressedAt
-      answers,
-      marketingConsent: document.getElementById('mk')?.checked === true,
-      customer: {
-        name: val('name'), surname: val('surname'), phone, email,
-        feedback: val('feedback'),
-        consent: document.getElementById('popia')?.checked || null
-      },
-      anonId: ANON_ID                                        // for 24h per-store limit (server)
-    };
-
-    // INSTANT THANK-YOU to stop spamming
-    showThankYou();
-
-    try{
-      const r = await fetch(CFG.apiUrl, {
-        method:'POST',
-        headers:{'Content-Type':'text/plain; charset=utf-8'},
-        body: JSON.stringify(payload)
-      });
-      // Even if JSON fails, user experience is already good (TY shown immediately)
-      const j = await r.json().catch(()=>({ok:false}));
-      // Optionally, you could log j to console for debugging:
-      // console.log('server:', j);
-    }catch(err){
-      // Network error; we still showed TY to avoid spam. You can optionally show a subtle toast/log.
-      // console.error(err);
-    }finally{
-      setTimeout(()=>{
-        hideThankYou(); SUBMITTING=false; unlockUI(); resetSurvey();
-        // Optionally reload to ensure a fresh state:
-        // location.reload();
-      }, CFG.THANKYOU_MS);
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', ()=>{
-    applyUrlDefaults();
-    renderQuestions();
-    document.getElementById('submitBtn').addEventListener('click', submitSurvey, {passive:true});
-  });
-  </script>
+function showThanks(){
+  const el=document.getElementById('thanks');
+  el.style.display='grid';
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>{ el.style.display='none'; resetForm(); }, 2500);
+}
+function resetForm(){
+  document.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
+  ['name','surname','phone','email','feedback'].forEach(id=>{const e=document.getElementById(id); if(e) e.value='';});
+  document.getElementById('popia').checked=false;
+  document.getElementById('mk').checked=false;
+  updateSubmitState();
+}
+function toast(msg){const s=document.getElementById('statusTxt');if(!s)return;s.textContent=msg;clearTimeout(s._t);s._t=setTimeout(()=>s.textContent='',1600);}
+</script>
 </body>
 </html>
