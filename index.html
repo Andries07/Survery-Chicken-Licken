@@ -13,35 +13,48 @@
 <style>
   *,*::before,*::after{box-sizing:border-box}
   :root{
-    --card-rgba: rgba(255,255,255,0.78);
+    --card-rgba: rgba(0,0,0,0.65);
+    --panel-rgba: rgba(255,255,255,0.78);
     --field-rgba: rgba(255,255,255,0.9);
     --text:#111;
     --green:#16a34a; --green2:#22c55e; --yellow:#facc15; --orange:#fb923c; --red:#dc2626;
   }
-  html,body{margin:0;height:100%;font-family:Arial,sans-serif;background:#000}
+  html,body{margin:0;height:100%;font-family:Arial,system-ui,-apple-system,sans-serif;background:#000}
+
+  /* Splash / Home */
   .home{
     position:fixed;inset:0;z-index:30;display:grid;place-items:center;
     background-image:url('./background.jpg');background-repeat:repeat;background-size:128px auto;
     padding:20px;
+    /* Ensure taps are treated as clicks immediately on Android */
+    touch-action: manipulation;
+    -webkit-user-select:none;user-select:none;
   }
   .home .card{
-    background:rgba(0,0,0,.65);color:#fff;padding:22px;border-radius:16px;text-align:center;
-    width:min(640px,94vw);
-    box-shadow:0 18px 54px rgba(0,0,0,.55)
+    position:relative;z-index:2;
+    background:var(--card-rgba);color:#fff;padding:24px;border-radius:16px;text-align:center;
+    width:min(680px,94vw);
+    box-shadow:0 18px 54px rgba(0,0,0,.55);
+    cursor:pointer; /* whole card is tappable */
   }
+  /* BIG headline tuned for Galaxy Tab A9 but responsive everywhere */
   .home h1{
-    margin:0 0 10px;
-    font-size:clamp(32px, 9vh, 60px);
-    line-height:1.05;letter-spacing:.3px;
+    margin:0 0 12px;
+    font-size:clamp(34px, 9.5vh, 64px);
+    line-height:1.04;letter-spacing:.3px;
   }
-  .home p{margin:0 0 14px;opacity:.95;font-size:clamp(14px, 2.3vh, 20px)}
+  .home p{margin:0 0 16px;opacity:.95;font-size:clamp(15px, 2.3vh, 20px)}
   .home .cta{
+    display:inline-block;
     background:#ff6900;color:#fff;border:0;border-radius:14px;
-    padding:16px 20px;font-weight:900;font-size:clamp(16px, 3vh, 22px);
-    cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.35)
+    padding:18px 22px;font-weight:900;font-size:clamp(18px, 3.2vh, 24px);
+    cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.35);
+    -webkit-tap-highlight-color:transparent;
+    touch-action: manipulation;
   }
   .home .tiny{font-size:clamp(10px, 1.8vh, 13px);opacity:.85;margin-top:12px}
 
+  /* Main survey */
   .hero{
     height:100dvh;
     background-image:url('./background.jpg');
@@ -56,10 +69,12 @@
     margin:0;text-align:center;color:#fff;font-weight:900;font-size:20px;line-height:1.1;
     text-shadow:0 2px 8px rgba(0,0,0,.55);
   }
+
   .content{min-height:0;overflow:hidden;display:grid;grid-template-rows:auto auto;gap:6px}
   .grid{display:grid;gap:6px}
-  .card{background:var(--card-rgba);border-radius:10px;padding:8px;box-shadow:0 6px 14px rgba(0,0,0,.22);backdrop-filter:saturate(120%) blur(2px)}
+  .card{background:var(--panel-rgba);border-radius:10px;padding:8px;box-shadow:0 6px 14px rgba(0,0,0,.22);backdrop-filter:saturate(120%) blur(2px)}
   .q-title{font-weight:900;font-size:15px;line-height:1.2;margin-bottom:4px;color:var(--text);letter-spacing:.2px}
+
   .q-row{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
   .opt{display:grid;place-items:center;gap:2px;padding:7px;min-height:42px;border-radius:9px;color:#fff;font-weight:800;cursor:pointer;border:2px solid transparent;user-select:none}
   .opt.active{outline:3px solid #000}
@@ -70,16 +85,19 @@
   .opt[data-score="1"]{background:var(--red)}
   .emo{font-size:17px}
   .lbl{font-size:11px}
+
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
   @media (max-width:640px){.grid2{grid-template-columns:1fr}}
   input,textarea{width:100%;padding:7px;border:1.2px solid #ddd;border-radius:9px;font-size:13px;min-width:0;background:var(--field-rgba)}
   textarea{min-height:54px;resize:vertical}
   .tiny{font-size:11px;color:#444;margin-top:2px}
   .error{outline:2px solid #dc2626}
+
   .row-end{display:flex;justify-content:space-between;align-items:center;gap:6px}
   .btn{background:#000;color:#fff;border:0;border-radius:10px;padding:9px 12px;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.25)}
   .btn:disabled{opacity:.6;cursor:not-allowed}
   .muted{color:#ffffff;opacity:.9;font-size:12px;min-height:16px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+
   .thanks{display:none;position:fixed;inset:0;z-index:20;place-items:center}
   .thanks::before{content:"";position:absolute;inset:0;background-image:url('./background.jpg');background-repeat:repeat;background-size:128px auto;opacity:.85}
   .thanks .in{position:relative;background:#fff;padding:14px;border-radius:12px;text-align:center;width:min(320px,92vw);box-shadow:0 18px 54px rgba(0,0,0,.4)}
@@ -87,17 +105,18 @@
 </head>
 <body>
 <script>
+  /* purge old caches/service workers to avoid stale JS */
   if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()));}
   if('caches' in window){caches.keys().then(k=>k.forEach(c=>caches.delete(c)));}
 </script>
 
 <!-- HOME / SPLASH -->
-<div class="home" id="home">
-  <div class="card">
+<div class="home" id="home" aria-label="Start feedback">
+  <div class="card" id="homeCard" role="button" aria-pressed="false">
     <h1>Please rate our service ⭐</h1>
     <p>Tap below to give quick feedback and help us improve.</p>
-    <!-- Inline handler ADDED -->
-    <button class="cta" id="startBtn" type="button" onclick="startSurvey()" tabindex="0">Rate our service</button>
+    <!-- Inline handler + role added -->
+    <button class="cta" id="startBtn" type="button" onclick="startSurvey()" role="button">Rate our service</button>
     <div class="tiny">Chicken Licken — Quick Feedback</div>
   </div>
 </div>
@@ -106,8 +125,12 @@
 <div class="hero" id="survey" style="display:none">
   <div class="wrap">
     <h1>Chicken Licken Quick Feedback</h1>
+
     <div class="content">
+      <!-- QUESTIONS -->
       <div id="qList" class="grid"></div>
+
+      <!-- OPTIONAL DETAILS -->
       <div class="card">
         <h3 class="q-title" style="margin:0 0 4px">Optional details</h3>
         <div class="tiny">If you add details, <b>Name</b>, <b>Surname</b> and a valid <b>10-digit Phone</b> are required and you must accept POPIA.</div>
@@ -116,8 +139,8 @@
           <div><input id="surname" placeholder="Surname" autocomplete="off" maxlength="50"></div>
         </div>
         <div class="grid2" style="margin-top:6px">
-          <div><input id="phone" placeholder="Phone (10 digits)" maxlength="10" autocomplete="off"></div>
-          <div><input id="email" placeholder="Email (optional)" autocomplete="off"></div>
+          <div><input id="phone" placeholder="Phone (10 digits)" maxlength="10" autocomplete="off" inputmode="numeric" pattern="[0-9]*"></div>
+          <div><input id="email" placeholder="Email (optional)" autocomplete="off" inputmode="email"></div>
         </div>
         <div style="margin-top:6px">
           <textarea id="feedback" placeholder="Additional feedback (optional)" autocomplete="off" maxlength="3000"></textarea>
@@ -132,6 +155,8 @@
         </label>
       </div>
     </div>
+
+    <!-- FOOTER -->
     <div class="row-end">
       <div class="muted" id="storeTag"></div>
       <div class="muted" id="statusTxt"></div>
@@ -158,8 +183,9 @@ function getDeviceId(){const keys=['deviceId','deviceid','did','DeviceId','DEVIC
 
 /* ===== CONFIG ===== */
 const CFG = {
-  apiUrl: "https://script.google.com/macros/s/AKfycbxb8JHst8eLOM1OvaEBDoXMmWMjUUwtKlgwtCJc4faD4myBvqhzfAJ1T7NYTI2dGX0i/exec",
-  token:  "CHANGE_ME_SUPER_SECRET",
+  apiUrl: "https://script.google.com/macros/s/AKfycbxb8JHst8eLOM1OvaEBDoXMmWMjUUwtKlgwtCJc4faD4myBvqhzfAJ1T7NYTI2dGX0i/exec
+", // set this
+  token:  "CHANGE_ME_SUPER_SECRET",               // must match Apps Script SHARED_TOKEN
   storeId:     getParam('store')  || 'CL-Witbank-Highveld',
   deviceLabel: getParam('device') || 'Front Counter',
   deviceId:    getDeviceId()
@@ -226,7 +252,44 @@ function updateSubmitState(){
 }
 document.addEventListener('input',updateSubmitState);
 
-/* ===== DUP GUARD ===== */
+/* ===== FLOW ===== */
+const homeEl = document.getElementById('home');
+const homeCard = document.getElementById('homeCard');
+const startBtn = document.getElementById('startBtn');
+const surveyEl = document.getElementById('survey');
+
+function startSurvey(){
+  try{
+    homeEl.style.display='none';
+    surveyEl.style.display='grid';
+    render();
+  }catch(e){ console.error('startSurvey error', e); }
+}
+
+/* Multiple bindings so at least one works everywhere */
+document.addEventListener('DOMContentLoaded', ()=>{
+  // Button (primary)
+  if (startBtn && !startBtn._bound) {
+    startBtn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); startSurvey(); }, { passive:false });
+    startBtn._bound = true;
+  }
+  // Whole card (secondary)
+  if (homeCard && !homeCard._bound) {
+    homeCard.addEventListener('click', (e)=>{
+      // Ignore clicks if they come from the footer tiny text only
+      const tiny = e.target.closest('.tiny'); if(tiny) return;
+      startSurvey();
+    }, { passive:true });
+    homeCard._bound = true;
+  }
+  // Key access (Enter / Space)
+  homeCard.addEventListener('keydown', (e)=>{
+    if (e.code === 'Enter' || e.code === 'Space'){ e.preventDefault(); startSurvey(); }
+  });
+});
+
+/* ===== SUBMIT (one-tap lock + instant thanks) ===== */
+let inFlight = false;
 function within24h(ts){return (Date.now() - Number(ts)) < 24*60*60*1000;}
 function dupLocalBlockIfAny(){
   const phone=val('phone'); const email=(val('email')||'').toLowerCase();
@@ -243,31 +306,6 @@ function dupLocalMark(){
   if(email) localStorage.setItem(`cl_last_email_${email}`, String(Date.now()));
 }
 
-/* ===== FLOW ===== */
-const homeEl = document.getElementById('home');
-const surveyEl = document.getElementById('survey');
-
-function startSurvey(){
-  try{
-    homeEl.style.display='none';
-    surveyEl.style.display='grid';
-    render();
-  }catch(e){
-    console.error('startSurvey error', e);
-  }
-}
-
-// Bind again after DOM is ready (backup in case inline fails)
-document.addEventListener('DOMContentLoaded', ()=>{
-  const btn = document.getElementById('startBtn');
-  if(btn && !btn._bound){
-    btn.addEventListener('click', startSurvey, { once:false });
-    btn._bound = true;
-  }
-});
-
-/* ===== SUBMIT (one-tap lock + instant thanks) ===== */
-let inFlight = false;
 function fireAndForgetSend(bodyStr){
   try{
     const ok = navigator.sendBeacon(CFG.apiUrl, new Blob([bodyStr], {type:'text/plain;charset=utf-8'}));
