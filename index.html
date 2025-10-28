@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+ <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Chicken Licken Feedback</title>
 
 <link rel="manifest" href="./manifest.json">
@@ -82,20 +83,20 @@
   function getDeviceId(){return localStorage.getItem('cl_device_id')}
 
   const CFG = {
-    apiUrl: "https://script.google.com/macros/s/AKfycbxccHEIISrwcoYOV3NIl1YacOvOWIJk49I3zdtGfVQqX5-tVrZWm3xv5OFRqa5Hudij/exec",                // <-- paste your Apps Script /exec URL
-    token:  "CHANGE_ME_SUPER_SECRET",            // must match SHARED_TOKEN in Apps Script
+    apiUrl: "https://script.google.com/macros/s/AKfycbxb8JHst8eLOM1OvaEBDoXMmWMjUUwtKlgwtCJc4faD4myBvqhzfAJ1T7NYTI2dGX0i/exec",  // Apps Script /exec
+    token:  "CHANGE_ME_SUPER_SECRET",        // must match SHARED_TOKEN
     storeId:     getParam('store')  || 'CL-Witbank-Highveld',
-    deviceLabel: getParam('deviceLabel') || getParam('device') || 'Front Counter',
-    deviceId:    getParam('deviceId') || getParam('device') || getDeviceId() // <- easier device id from URL
+    deviceLabel: getParam('device') || 'Front Counter',
+    deviceId:    getParam('deviceId') || getParam('device') || getDeviceId()   // <<< allow deviceId from URL
   };
 
-  // Questions (match your sheet/debug)
+  /* ===== QUESTIONS ===== */
   const QUESTIONS=[
-    {id:'q1',text:'Speed of service'},
-    {id:'q2',text:'Friendliness of staff'},
-    {id:'q3',text:'Order accuracy'},
-    {id:'q4',text:'Cleanliness of store'},
-    {id:'q5',text:'Overall experience'}
+{id:'q1',text:'Speed of service'},
+{id:'q2',text:'Friendliness of staff'},
+{id:'q3',text:'Order accuracy'},
+{id:'q4',text:'Cleanliness of store'},
+{id:'q5',text:'Overall experience'} 
   ];
   const CHOICES=[
     {score:5,emo:'😁',txt:'Excellent'},
@@ -105,7 +106,9 @@
     {score:1,emo:'😡',txt:'Terrible'}
   ];
 
-  // Optional cache-bust polling for version.json
+  /* ===== CACHE BUST (optional) ===== */
+  if('caches' in window){caches.keys().then(k=>k.forEach(c=>caches.delete(c)));}
+
   (function(){const POLL=10*60*1000;function check(){fetch('./version.json').then(r=>r.json()).then(v=>{const cur=localStorage.getItem('cl_ver');if(cur&&cur!==v.version){location.reload();}localStorage.setItem('cl_ver',v.version);}).catch(()=>{});}try{check();setInterval(check,POLL);}catch(e){}})();
 </script>
 
@@ -114,8 +117,10 @@
     <h1>Chicken Licken Quick Feedback</h1>
 
     <div class="content">
+      <!-- QUESTIONS -->
       <div id="qList" class="grid"></div>
 
+      <!-- OPTIONAL DETAILS (always visible) -->
       <div class="card">
         <h3 class="q-title" style="margin:0 0 4px">Optional details</h3>
         <div class="tiny">If you add details, <b>Name</b>, <b>Surname</b>, <b>10-digit Phone</b> are required and you must accept POPIA.</div>
@@ -149,6 +154,7 @@
   </div>
 </div>
 
+<!-- Thank-you overlay -->
 <div class="thanks" id="thanks">
   <div class="card">
     <h2>Thank you! 🧡</h2>
@@ -157,6 +163,7 @@
 </div>
 
 <script>
+/* ===== RENDER ===== */
 function makeQuestion(q){
   const card=document.createElement('div');card.className='card';
   const title=document.createElement('div');title.className='q-title';title.textContent=q.text;
@@ -177,10 +184,11 @@ function makeQuestion(q){
 function render(){
   const list=document.getElementById('qList');list.innerHTML='';
   QUESTIONS.forEach(q=>list.appendChild(makeQuestion(q)));
-  document.getElementById('storeTag').textContent=`${CFG.storeId} • ${CFG.deviceLabel} • ${CFG.deviceId}`;
+  document.getElementById('storeTag').textContent=`${CFG.storeId} • ${CFG.deviceLabel} • ${CFG.deviceId||'no deviceId'}`;
 }
 render();
 
+/* ===== VALIDATION ===== */
 function val(id){return(document.getElementById(id).value||'').trim();}
 function detailsAnyFilled(){return!!(val('name')||val('surname')||val('phone')||val('email')||val('feedback'));}
 function allAnswered(){return QUESTIONS.every(q=>document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`));}
@@ -202,7 +210,7 @@ function updateSubmitState(){
 }
 document.addEventListener('input',updateSubmitState);
 
-// local dup guard (24h)
+/* ===== LIGHT CLIENT DUP GUARD (local) ===== */
 function within24h(ts){return (Date.now() - Number(ts)) < 24*60*60*1000;}
 function dupLocalBlockIfAny(){
   const phone=val('phone'); const email=(val('email')||'').toLowerCase();
@@ -219,6 +227,7 @@ function dupLocalMark(){
   if(email) localStorage.setItem(`cl_last_email_${email}`, String(Date.now()));
 }
 
+/* ===== SUBMIT ===== */
 document.getElementById('submitBtn').addEventListener('click',async()=>{
   if(!allAnswered()){toast('Please answer all questions');return;}
   const any=detailsAnyFilled();
@@ -230,6 +239,7 @@ document.getElementById('submitBtn').addEventListener('click',async()=>{
   }
   const em=val('email');if(em&&!/.+@.+\..+/.test(em)){toast('Enter a valid Email');return;}
 
+  // Local dup guard (UI feedback); server also enforces
   if(dupLocalBlockIfAny()){ toast('You have already submitted in the last 24 hours.'); return; }
 
   const answers=QUESTIONS.map(q=>{
@@ -254,11 +264,11 @@ document.getElementById('submitBtn').addEventListener('click',async()=>{
 
   const bodyStr = JSON.stringify(payload);
 
-  // show thank-you immediately + prevent spamming
+  // Show thanks immediately and prevent spamming
   dupLocalMark();
   showThanks();
 
-  // fire-and-forget submit
+  // Fire-and-forget submission (non-blocking)
   try {
     navigator.sendBeacon(CFG.apiUrl, new Blob([bodyStr], {type:'text/plain;charset=utf-8'}));
   } catch(e) {
