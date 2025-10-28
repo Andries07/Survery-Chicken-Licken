@@ -24,16 +24,28 @@
   .home{
     position:fixed;inset:0;z-index:30;display:grid;place-items:center;
     background-image:url('./background.jpg');background-repeat:repeat;background-size:128px auto;
+    padding:20px;
   }
   .home .card{
-    background:rgba(0,0,0,.65);color:#fff;padding:18px;border-radius:14px;text-align:center;
-    width:min(520px,92vw);box-shadow:0 18px 54px rgba(0,0,0,.55)
+    background:rgba(0,0,0,.65);color:#fff;padding:22px;border-radius:16px;text-align:center;
+    width:min(640px,94vw);
+    box-shadow:0 18px 54px rgba(0,0,0,.55)
   }
-  .home h1{margin:0 0 8px;font-size:24px;letter-spacing:.3px}
-  .home p{margin:0 0 12px;opacity:.95}
-  .home .cta{background:#ff6900;color:#fff;border:0;border-radius:12px;padding:12px 16px;
-    font-weight:900;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.35)}
-  .home .tiny{font-size:12px;opacity:.85;margin-top:10px}
+  /* BIG headline tuned for Galaxy Tab A9 (800px height) but responsive everywhere */
+  .home h1{
+    margin:0 0 10px;
+    font-size:clamp(32px, 9vh, 60px);
+    line-height:1.05;
+    letter-spacing:.3px;
+  }
+  .home p{margin:0 0 14px;opacity:.95;font-size:clamp(14px, 2.3vh, 20px)}
+  .home .cta{
+    background:#ff6900;color:#fff;border:0;border-radius:14px;
+    padding:16px 20px;
+    font-weight:900;font-size:clamp(16px, 3vh, 22px);
+    cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.35)
+  }
+  .home .tiny{font-size:clamp(10px, 1.8vh, 13px);opacity:.85;margin-top:12px}
 
   /* Main survey */
   .hero{
@@ -86,11 +98,11 @@
 </head>
 <body>
 <script>
-  // clear old SW/caches to avoid stale code sticking around
+  // Clear old SW/caches to avoid stale code
   if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()));}
   if('caches' in window){caches.keys().then(k=>k.forEach(c=>caches.delete(c)));}
 
-  // simple version poller (optional)
+  // Optional version poller
   (function(){const POLL=10*60*1000;function check(){fetch('./version.json?ts='+Date.now()).then(r=>r.json()).then(v=>{const cur=localStorage.getItem('appVersion');if(!cur)localStorage.setItem('appVersion',v.version);if(cur&&cur!==v.version){localStorage.setItem('appVersion',v.version);location.reload(true);}}).catch(()=>{});}try{check();setInterval(check,POLL);}catch(e){}})();
 </script>
 
@@ -113,7 +125,7 @@
       <!-- QUESTIONS -->
       <div id="qList" class="grid"></div>
 
-      <!-- OPTIONAL DETAILS (always visible) -->
+      <!-- OPTIONAL DETAILS -->
       <div class="card">
         <h3 class="q-title" style="margin:0 0 4px">Optional details</h3>
         <div class="tiny">If you add details, <b>Name</b>, <b>Surname</b> and a valid <b>10-digit Phone</b> are required and you must accept POPIA.</div>
@@ -148,7 +160,7 @@
   </div>
 </div>
 
-<!-- THANK YOU (auto close) -->
+<!-- THANK YOU -->
 <div class="thanks" id="thanks">
   <div class="in">
     <h2 style="margin:0 0 6px">Thank you!</h2>
@@ -164,10 +176,11 @@ function getParamAny(keys){const u=new URL(location.href);for(const k of keys){c
 function getParam(k){const u=new URL(location.href);return normSpaces(u.searchParams.get(k));}
 function getDeviceId(){const keys=['deviceId','deviceid','did','DeviceId','DEVICEID'];let v=getParamAny(keys);if(v){localStorage.setItem('cl_deviceId',v);return v;}v=localStorage.getItem('cl_deviceId')||'';if(v)return v;v=(prompt('Enter device ID (e.g. A9-Front-01)')||'').trim();if(v)localStorage.setItem('cl_deviceId',v);return v;}
 
-/* ===== CONFIG (SET THESE) ===== */
+/* ===== CONFIG ===== */
 const CFG = {
-  apiUrl: "https://script.google.com/macros/s/AKfycbxb8JHst8eLOM1OvaEBDoXMmWMjUUwtKlgwtCJc4faD4myBvqhzfAJ1T7NYTI2dGX0i/exec",  // Apps Script /exec
-  token:  "CHANGE_ME_SUPER_SECRET",        // must match SHARED_TOKEN in Apps Script
+  apiUrl: "https://script.google.com/macros/s/AKfycbxb8JHst8eLOM1OvaEBDoXMmWMjUUwtKlgwtCJc4faD4myBvqhzfAJ1T7NYTI2dGX0i/exec
+", // e.g. https://script.google.com/macros/s/AKfycb.../exec
+  token:  "CHANGE_ME_SUPER_SECRET",               // must match SHARED_TOKEN in Apps Script
   storeId:     getParam('store')  || 'CL-Witbank-Highveld',
   deviceLabel: getParam('device') || 'Front Counter',
   deviceId:    getDeviceId()
@@ -234,7 +247,7 @@ function updateSubmitState(){
 }
 document.addEventListener('input',updateSubmitState);
 
-/* ===== LIGHT CLIENT DUP GUARD (local) ===== */
+/* ===== LIGHT CLIENT DUP GUARD ===== */
 function within24h(ts){return (Date.now() - Number(ts)) < 24*60*60*1000;}
 function dupLocalBlockIfAny(){
   const phone=val('phone'); const email=(val('email')||'').toLowerCase();
@@ -251,7 +264,7 @@ function dupLocalMark(){
   if(email) localStorage.setItem(`cl_last_email_${email}`, String(Date.now()));
 }
 
-/* ===== HOME / FLOW ===== */
+/* ===== FLOW ===== */
 const homeEl = document.getElementById('home');
 const surveyEl = document.getElementById('survey');
 document.getElementById('startBtn').addEventListener('click', ()=>{
@@ -265,11 +278,9 @@ let inFlight = false;
 
 function fireAndForgetSend(bodyStr){
   try{
-    // Prefer sendBeacon for background send
     const ok = navigator.sendBeacon(CFG.apiUrl, new Blob([bodyStr], {type:'text/plain;charset=utf-8'}));
     if(ok) return;
   }catch(_){}
-  // Fallback fetch, no-cors, keepalive
   try{
     fetch(CFG.apiUrl,{ method:'POST', mode:'no-cors',
       headers:{'Content-Type':'text/plain;charset=utf-8'},
@@ -278,7 +289,7 @@ function fireAndForgetSend(bodyStr){
 }
 
 document.getElementById('submitBtn').addEventListener('click',()=>{
-  if(inFlight) return; // hard lock against spamming
+  if(inFlight) return;
 
   if(!allAnswered()){toast('Please answer all questions');return;}
   const any=detailsAnyFilled();
@@ -311,7 +322,6 @@ document.getElementById('submitBtn').addEventListener('click',()=>{
     }
   };
 
-  // One-tap lock and instant thank-you
   inFlight = true;
   document.getElementById('submitBtn').disabled = true;
   const bodyStr = JSON.stringify(payload);
@@ -324,11 +334,9 @@ function showThanks(){
   const el=document.getElementById('thanks');
   el.style.display='grid';
   clearTimeout(el._t);
-  // Show slightly longer to comfortably finish network send
   el._t=setTimeout(()=>{
     el.style.display='none';
     resetForm();
-    // return to splash for next customer
     surveyEl.style.display='none';
     homeEl.style.display='grid';
   }, 3000);
@@ -338,7 +346,7 @@ function resetForm(){
   ['name','surname','phone','email','feedback'].forEach(id=>{const e=document.getElementById(id); if(e) e.value='';});
   document.getElementById('popia').checked=false;
   document.getElementById('mk').checked=false;
-  inFlight = false; // release lock for next session
+  inFlight = false;
   updateSubmitState();
 }
 function toast(msg){const s=document.getElementById('statusTxt');if(!s)return;s.textContent=msg;clearTimeout(s._t);s._t=setTimeout(()=>s.textContent='',1600);}
