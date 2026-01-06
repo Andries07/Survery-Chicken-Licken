@@ -26,7 +26,6 @@
     position:fixed;inset:0;z-index:30;display:grid;place-items:center;
     background-image:url('./background.jpg');background-repeat:repeat;background-size:128px auto;
     padding:20px;
-    /* Ensure taps are treated as clicks immediately on Android */
     touch-action: manipulation;
     -webkit-user-select:none;user-select:none;
   }
@@ -35,9 +34,8 @@
     background:var(--card-rgba);color:#fff;padding:24px;border-radius:16px;text-align:center;
     width:min(680px,94vw);
     box-shadow:0 18px 54px rgba(0,0,0,.55);
-    cursor:pointer; /* whole card is tappable */
+    cursor:pointer;
   }
-  /* BIG headline tuned for Galaxy Tab A9 but responsive everywhere */
   .home h1{
     margin:0 0 12px;
     font-size:clamp(34px, 9.5vh, 64px);
@@ -78,6 +76,7 @@
   .q-row{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
   .opt{display:grid;place-items:center;gap:2px;padding:7px;min-height:42px;border-radius:9px;color:#fff;font-weight:800;cursor:pointer;border:2px solid transparent;user-select:none}
   .opt.active{outline:3px solid #000}
+  .opt:hover{border-color:#000}
   .opt[data-score="5"]{background:var(--green)}
   .opt[data-score="4"]{background:var(--green2)}
   .opt[data-score="3"]{background:var(--yellow);color:#111}
@@ -101,11 +100,42 @@
   .thanks{display:none;position:fixed;inset:0;z-index:20;place-items:center}
   .thanks::before{content:"";position:absolute;inset:0;background-image:url('./background.jpg');background-repeat:repeat;background-size:128px auto;opacity:.85}
   .thanks .in{position:relative;background:#fff;padding:14px;border-radius:12px;text-align:center;width:min(320px,92vw);box-shadow:0 18px 54px rgba(0,0,0,.4)}
+
+  /* Bad-review modal */
+  .modal{
+    display:none;position:fixed;inset:0;z-index:40;
+    background:rgba(0,0,0,.6);
+    place-items:center;
+    padding:16px;
+  }
+  .modal .box{
+    width:min(520px,94vw);
+    background:#fff;border-radius:14px;overflow:hidden;
+    box-shadow:0 18px 54px rgba(0,0,0,.45);
+    font-family:Arial,Helvetica,sans-serif;
+  }
+  .modal .top{
+    background:#ff6900;color:#fff;font-weight:900;
+    padding:12px 14px;font-size:16px;
+  }
+  .modal .body{padding:12px 14px;color:#111;font-size:14px;line-height:1.4}
+  .modal .body b{font-weight:900}
+  .modal .actions{display:flex;justify-content:flex-end;gap:8px;padding:12px 14px;background:#f6f6f6}
+  .modal .actions button{
+    background:#000;color:#fff;border:0;border-radius:10px;
+    padding:10px 12px;font-weight:900;cursor:pointer;
+  }
+</style>
+
+<!-- minimal hotfix (no visual change to your design) -->
+<style>
+  html, body { height:100%; min-height:100%; }
+  .home{ min-height:100svh !important; }
+  .hero{ min-height:100svh !important; height:auto !important; }
 </style>
 </head>
 <body>
 <script>
-  /* purge old caches/service workers to avoid stale JS */
   if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()));}
   if('caches' in window){caches.keys().then(k=>k.forEach(c=>caches.delete(c)));}
 </script>
@@ -115,7 +145,6 @@
   <div class="card" id="homeCard" role="button" aria-pressed="false">
     <h1>Please rate our service ⭐</h1>
     <p>Tap below to give quick feedback and help us improve.</p>
-    <!-- Inline handler + role added -->
     <button class="cta" id="startBtn" type="button" onclick="startSurvey()" role="button">Rate our service</button>
     <div class="tiny">Chicken Licken — Quick Feedback</div>
   </div>
@@ -127,13 +156,14 @@
     <h1>Chicken Licken Quick Feedback</h1>
 
     <div class="content">
-      <!-- QUESTIONS -->
       <div id="qList" class="grid"></div>
 
-      <!-- OPTIONAL DETAILS -->
-      <div class="card">
+      <div class="card" id="optCard">
         <h3 class="q-title" style="margin:0 0 4px">Optional details</h3>
-        <div class="tiny">If you add details, <b>Name</b>, <b>Surname</b> and a valid <b>10-digit Phone</b> are required and you must accept POPIA.</div>
+        <div class="tiny" id="optHint">
+          If you add details, <b>Name</b>, <b>Surname</b> and a valid <b>10-digit Phone</b> are required and you must accept POPIA.
+          <span id="badHint" style="display:none"><br><b>Note:</b> Because you selected a poor/bad rating, contact details are required so the store can follow up.</span>
+        </div>
         <div class="grid2" style="margin-top:6px">
           <div><input id="name" placeholder="Name" autocomplete="off" maxlength="50"></div>
           <div><input id="surname" placeholder="Surname" autocomplete="off" maxlength="50"></div>
@@ -144,10 +174,13 @@
         </div>
         <div style="margin-top:6px">
           <textarea id="feedback" placeholder="Additional feedback (optional)" autocomplete="off" maxlength="3000"></textarea>
+          <div class="tiny">Max 3000 characters.</div>
         </div>
         <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:6px">
           <input type="checkbox" id="popia" style="margin-top:3px">
-          <small>I consent to processing my personal info for service quality in line with POPIA.</small>
+          <small>
+            I consent to processing my personal info for service quality in line with POPIA and I allow Chicken Licken to contact me regarding this feedback.
+          </small>
         </label>
         <label style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;margin-top:4px">
           <input type="checkbox" id="mk" style="margin-top:3px">
@@ -156,7 +189,6 @@
       </div>
     </div>
 
-    <!-- FOOTER -->
     <div class="row-end">
       <div class="muted" id="storeTag"></div>
       <div class="muted" id="statusTxt"></div>
@@ -165,7 +197,6 @@
   </div>
 </div>
 
-<!-- THANK YOU -->
 <div class="thanks" id="thanks">
   <div class="in">
     <h2 style="margin:0 0 6px">Thank you!</h2>
@@ -174,19 +205,70 @@
   </div>
 </div>
 
+<!-- Bad-review modal -->
+<div class="modal" id="badModal" aria-hidden="true">
+  <div class="box">
+    <div class="top">We want to fix this</div>
+    <div class="body">
+      We’re sorry your experience wasn’t great. Please provide your <b>Name</b>, <b>Surname</b> and <b>Phone number</b> so the store can contact you and resolve the issue.<br><br>
+      You will also need to tick the box that allows us to contact you.
+    </div>
+    <div class="actions">
+      <button type="button" id="badOk">OK</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ===== UTIL ===== */
 function normSpaces(s){return (s||'').replace(/\+/g,' ').trim();}
 function getParamAny(keys){const u=new URL(location.href);for(const k of keys){const v=u.searchParams.get(k);if(v)return normSpaces(v);}if(u.hash&&u.hash.includes('=')){const h=new URLSearchParams(u.hash.replace(/^#/,''));for(const k of keys){const v=h.get(k);if(v)return normSpaces(v);}}return '';}
 function getParam(k){const u=new URL(location.href);return normSpaces(u.searchParams.get(k));}
-function getDeviceId(){const keys=['deviceId','deviceid','did','DeviceId','DEVICEID'];let v=getParamAny(keys);if(v){localStorage.setItem('cl_deviceId',v);return v;}v=localStorage.getItem('cl_deviceId')||'';if(v)return v;v=(prompt('Enter device ID (e.g. A9-Front-01)')||'').trim();if(v)localStorage.setItem('cl_deviceId',v);return v;}
+
+function getDeviceId(){
+  const keys=['device','deviceId','deviceid','did','DeviceId','DEVICEID'];
+  let v = getParamAny(keys);
+  if (v){
+    try { localStorage.setItem('cl_deviceId', v); } catch(_) {}
+    return v;
+  }
+  try { v = localStorage.getItem('cl_deviceId') || ''; } catch(_) { v=''; }
+  if (v) return v;
+  return 'UNKNOWN';
+}
+
+function getStoreId(){
+  const keys=['store','Store','storeId','StoreId'];
+  let v=getParamAny(keys);
+  if(v){
+    try{ localStorage.setItem('cl_storeId',v); }catch(_){}
+    return v;
+  }
+  try{
+    const cached = localStorage.getItem('cl_storeId')||'';
+    if(cached) return cached;
+  }catch(_){}
+  return 'CL-Witbank-Highveld';
+}
+function getDeviceLabel(){
+  let v=getParam('device');
+  if(v){
+    try{ localStorage.setItem('cl_deviceLabel',v); }catch(_){}
+    return v;
+  }
+  try{
+    const cached = localStorage.getItem('cl_deviceLabel')||'';
+    if(cached) return cached;
+  }catch(_){}
+  return 'Front Counter';
+}
 
 /* ===== CONFIG ===== */
 const CFG = {
-  apiUrl: "https://script.google.com/macros/s/AKfycbxb8JHst8eLOM1OvaEBDoXMmWMjUUwtKlgwtCJc4faD4myBvqhzfAJ1T7NYTI2dGX0i/exec", // set this
-  token:  "CHANGE_ME_SUPER_SECRET",               // must match Apps Script SHARED_TOKEN
-  storeId:     getParam('store')  || 'CL-Witbank-Highveld',
-  deviceLabel: getParam('device') || 'Front Counter',
+  apiUrl: "https://script.google.com/macros/s/AKfycbwfNmjqiHoWBwHm78PKH9GqgBqDQttzR1t-JZrNMlmxBMiXQy8_XlmaUUy8bX03Oi3Z/exec",
+  token:  "CHANGE_ME_SUPER_SECRET",
+  storeId:     getStoreId(),
+  deviceLabel: getDeviceLabel(),
   deviceId:    getDeviceId()
 };
 
@@ -217,7 +299,8 @@ function makeQuestion(q){
     d.innerHTML=`<div class="emo">${c.emo}</div><div class="lbl">${c.txt}</div>`;
     d.addEventListener('click',()=>{
       row.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
-      d.classList.add('active');updateSubmitState();
+      d.classList.add('active');
+      updateSubmitState();
     });
     row.appendChild(d);
   });
@@ -232,22 +315,93 @@ function render(){
 
 /* ===== VALIDATION ===== */
 function val(id){return(document.getElementById(id).value||'').trim();}
-function detailsAnyFilled(){return!!(val('name')||val('surname')||val('phone')||val('email')||val('feedback'));}
+function detailsAnyFilled(){
+  const name=val('name'), sur=val('surname'), ph=val('phone'), em=(val('email')||'').toLowerCase(), fb=val('feedback');
+  const hasName = name.length>=2, hasSur=sur.length>=2;
+  const hasPhone = /^\d{10}$/.test(ph);
+  const hasEmail = !!em && /.+@.+\..+/.test(em);
+  const hasFb = fb.length>=3;
+  return hasName || hasSur || hasPhone || hasEmail || hasFb;
+}
 function allAnswered(){return QUESTIONS.every(q=>document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`));}
+
+function hasBadSelected(){
+  for (const q of QUESTIONS){
+    const el = document.querySelector(`.q-row[data-qid="${q.id}"] .opt.active`);
+    if (!el) return false;
+    const score = Number(el.dataset.score || 0);
+    if (score <= 2) return true;
+  }
+  return false;
+}
+
 function markError(id,on){const el=document.getElementById(id);if(el)el.classList.toggle('error',!!on);}
+
+let badPopupShown = false;
+
+function showBadModal(){
+  const m = document.getElementById('badModal');
+  if (!m) return;
+  m.style.display='grid';
+  m.setAttribute('aria-hidden','false');
+}
+function hideBadModal(){
+  const m = document.getElementById('badModal');
+  if (!m) return;
+  m.style.display='none';
+  m.setAttribute('aria-hidden','true');
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  const ok = document.getElementById('badOk');
+  if(ok){
+    ok.addEventListener('click', ()=>{
+      hideBadModal();
+      // focus into optional details for quick capture
+      const n = document.getElementById('name');
+      if(n) n.focus();
+    });
+  }
+});
+
 function updateSubmitState(){
   let ok=allAnswered();
   const any=detailsAnyFilled();
-  const requireName=any&&!val('name');
-  const requireSurname=any&&!val('surname');
-  const phoneVal=val('phone');
-  const requirePhone=any&&!/^\d{10}$/.test(phoneVal);
-  const requirePOPIA=any&&!document.getElementById('popia').checked;
+  const bad = ok && hasBadSelected(); // only evaluate after answered
+
+  // show hint when bad
+  const badHint = document.getElementById('badHint');
+  if (badHint) badHint.style.display = bad ? 'inline' : 'none';
+
+  // If bad review => require details + POPIA
+  const mustProvide = bad ? true : any;
+
+  const requireName    = mustProvide && !val('name');
+  const requireSurname = mustProvide && !val('surname');
+
+  const phoneVal = val('phone');
+  const requirePhone = mustProvide && !/^\d{10}$/.test(phoneVal);
+
+  const requirePOPIA = mustProvide && !document.getElementById('popia').checked;
+
   const em=val('email');
-  const badEmail=em&&!/.+@.+\..+/.test(em);
-  markError('name',requireName);markError('surname',requireSurname);markError('phone',requirePhone);
-  if(requireName||requireSurname||requirePhone||requirePOPIA||badEmail)ok=false;
-  document.getElementById('submitBtn').disabled=!ok;
+  const badEmail=em && !/.+@.+\..+/.test(em);
+
+  markError('name',requireName);
+  markError('surname',requireSurname);
+  markError('phone',requirePhone);
+
+  if(requireName||requireSurname||requirePhone||requirePOPIA||badEmail) ok=false;
+
+  const btn=document.getElementById('submitBtn'); if(btn) btn.disabled=!ok;
+
+  // popup after all answered if bad present
+  if (allAnswered() && hasBadSelected() && !badPopupShown){
+    badPopupShown = true;
+    showBadModal();
+  }
+
+  return ok;
 }
 document.addEventListener('input',updateSubmitState);
 
@@ -264,30 +418,24 @@ function startSurvey(){
     render();
   }catch(e){ console.error('startSurvey error', e); }
 }
-
-/* Multiple bindings so at least one works everywhere */
 document.addEventListener('DOMContentLoaded', ()=>{
-  // Button (primary)
   if (startBtn && !startBtn._bound) {
     startBtn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); startSurvey(); }, { passive:false });
     startBtn._bound = true;
   }
-  // Whole card (secondary)
   if (homeCard && !homeCard._bound) {
     homeCard.addEventListener('click', (e)=>{
-      // Ignore clicks if they come from the footer tiny text only
       const tiny = e.target.closest('.tiny'); if(tiny) return;
       startSurvey();
     }, { passive:true });
     homeCard._bound = true;
   }
-  // Key access (Enter / Space)
   homeCard.addEventListener('keydown', (e)=>{
     if (e.code === 'Enter' || e.code === 'Space'){ e.preventDefault(); startSurvey(); }
   });
 });
 
-/* ===== SUBMIT (one-tap lock + instant thanks) ===== */
+/* ===== SUBMIT ===== */
 let inFlight = false;
 function within24h(ts){return (Date.now() - Number(ts)) < 24*60*60*1000;}
 function dupLocalBlockIfAny(){
@@ -323,14 +471,25 @@ document.addEventListener('DOMContentLoaded', ()=>{
   submit.addEventListener('click',()=>{
     if(inFlight) return;
 
+    if (typeof window.CL_QR_canSubmit === 'function' && !window.CL_QR_canSubmit()){
+      toast('You have already submitted a review in the last 24 hours.');
+      return;
+    }
+
     if(!allAnswered()){toast('Please answer all questions');return;}
-    const any=detailsAnyFilled();
-    if(any){
+
+    const bad = hasBadSelected();
+    const any = detailsAnyFilled();
+    const mustProvide = bad ? true : any;
+
+    // If bad => force details
+    if(mustProvide){
       if(!val('name')){toast('Please enter your Name');return;}
       if(!val('surname')){toast('Please enter your Surname');return;}
       const ph=val('phone');if(!/^\d{10}$/.test(ph)){toast('Enter a valid 10-digit Phone');return;}
-      if(!document.getElementById('popia').checked){toast('Tick POPIA consent');return;}
+      if(!document.getElementById('popia').checked){toast('Please tick consent so we may contact you');return;}
     }
+
     const em=val('email');if(em&&!/.+@.+\..+/.test(em)){toast('Enter a valid Email');return;}
     if(dupLocalBlockIfAny()){ toast('You have already submitted in the last 24 hours.'); return; }
 
@@ -347,6 +506,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
       storeId:CFG.storeId,deviceLabel:CFG.deviceLabel,deviceId:CFG.deviceId,
       pressedAtUtc:new Date().toISOString(),answers,
       marketingConsent:document.getElementById('mk').checked===true,
+      sourceMode: (window.CL_QR_ctx && window.CL_QR_ctx.mode) || 'tablet',
+      qrUid: (window.CL_QR_ctx && window.CL_QR_ctx.uid) || '',
       customer:{
         name:val('name'),surname:val('surname'),phone:val('phone'),
         email:val('email'),feedback:val('feedback'),
@@ -356,8 +517,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
     inFlight = true;
     submit.disabled = true;
+
+    // keep UI instant
     fireAndForgetSend(JSON.stringify(payload));
+
     dupLocalMark();
+    if (typeof window.CL_QR_markSubmitted === 'function') window.CL_QR_markSubmitted();
     showThanks();
   });
 });
@@ -379,9 +544,208 @@ function resetForm(){
   document.getElementById('popia').checked=false;
   document.getElementById('mk').checked=false;
   inFlight = false;
+  badPopupShown = false;
+  hideBadModal();
   updateSubmitState();
 }
 function toast(msg){const s=document.getElementById('statusTxt');if(!s)return;s.textContent=msg;clearTimeout(s._t);s._t=setTimeout(()=>s.textContent='',1600);}
 </script>
+
+<!-- QR overlay -->
+<script>
+(function(){
+  function qp(k){ try{ return (new URL(location.href).searchParams.get(k)||'').trim(); }catch(_){ return '' } }
+  function gen(){ return 'qr_' + Math.random().toString(36).slice(2) + Date.now().toString(36); }
+
+  var STORE_BY_SLUG = {
+    "witbank-highveld":"CL-Witbank-Highveld",
+    "saveways":"CL-Saveways",
+    "sasol":"CL-Sasol",
+    "midellburg-mall":"CL-Midellburg-Mall",
+    "mhluzi":"CL-Mhluzi",
+    "groblersdal-mall":"CL-Groblersdal-Mall",
+    "epping":"CL-Epping",
+    "cape-station":"CL-Cape-Station",
+    "athlone":"CL-Athlone",
+    "bronkhorstspruit":"CL-Bronkhorstspruit",
+    "ok":"CL-Ok"
+  };
+
+  var slug  = (qp('s')||'').toLowerCase();
+  var src   = (qp('source')||'').toLowerCase();
+
+  if (slug && STORE_BY_SLUG[slug]) {
+    CFG.storeId = STORE_BY_SLUG[slug];
+    try{ localStorage.setItem('cl_storeId', CFG.storeId); }catch(_){}
+  }
+
+  window.CL_QR_ctx = { mode:'tablet', uid:'' };
+
+  if (src === 'qr-in' || src === 'qr-drive') {
+    var mode = (src === 'qr-in') ? 'qr-in' : 'qr-drive';
+    window.CL_QR_ctx.mode = mode;
+
+    CFG.deviceLabel = (mode === 'qr-in') ? 'QR Poster (Inside)' : 'QR Poster (Drive-Thru)';
+    CFG.deviceId    = ((mode === 'qr-in') ? 'QRIN-' : 'QRDRIVE-') + (slug || (qp('store')||'unknown'));
+
+    try{
+      var uidKey = 'cl_qr_uid_' + mode;
+      var uid = localStorage.getItem(uidKey);
+      if(!uid){ uid = gen(); localStorage.setItem(uidKey, uid); }
+      window.CL_QR_ctx.uid = uid;
+
+      window.CL_QR_canSubmit = function(){
+        var key = 'cl_qr_last_' + mode + '_' + uid;
+        var last = parseInt(localStorage.getItem(key)||'0',10);
+        if (last && (Date.now()-last) < 24*60*60*1000) return false;
+        return true;
+      };
+      window.CL_QR_markSubmitted = function(){
+        var key = 'cl_qr_last_' + mode + '_' + uid;
+        localStorage.setItem(key, String(Date.now()));
+      };
+    }catch(_){}
+  }else{
+    window.CL_QR_canSubmit = function(){ return true; };
+    window.CL_QR_markSubmitted = function(){};
+  }
+})();
+</script>
+
+<!-- render safeguard -->
+<script>
+(function(){
+  function ensureQuestions(){
+    if (!Array.isArray(window.QUESTIONS) || !window.QUESTIONS.length){
+      window.QUESTIONS = [
+        {id:'Q1',text:'Speed of service'},
+        {id:'Q2',text:'Friendliness of staff'},
+        {id:'Q3',text:'Order accuracy'},
+        {id:'Q4',text:'Cleanliness of store'},
+        {id:'Q5',text:'Overall experience'}
+      ];
+    }
+    if (!Array.isArray(window.CHOICES) || !window.CHOICES.length){
+      window.CHOICES = [
+        {txt:'Excellent',score:5,emo:'😄'},
+        {txt:'Good',     score:4,emo:'🙂'},
+        {txt:'Average',  score:3,emo:'😐'},
+        {txt:'Poor',     score:2,emo:'🙁'},
+        {txt:'Bad',      score:1,emo:'😡'}
+      ];
+    }
+  }
+  function fallbackBuild(){
+    var list = document.getElementById('qList'); if (!list) return;
+    list.innerHTML = '';
+    window.QUESTIONS.forEach(function(q){
+      var card = document.createElement('div'); card.className='card';
+      var title=document.createElement('div'); title.className='q-title'; title.textContent=q.text;
+      var row=document.createElement('div'); row.className='q-row'; row.dataset.qid=q.id;
+      window.CHOICES.forEach(function(c){
+        var d=document.createElement('div'); d.className='opt'; d.dataset.score=c.score;
+        d.innerHTML = '<div class="emo">'+c.emo+'</div><div class="lbl">'+c.txt+'</div>';
+        d.addEventListener('click', function(){
+          row.querySelectorAll('.opt').forEach(function(x){x.classList.remove('active');});
+          d.classList.add('active');
+          if (typeof window.updateSubmitState === 'function') window.updateSubmitState();
+        });
+        row.appendChild(d);
+      });
+      card.appendChild(title); card.appendChild(row);
+      list.appendChild(card);
+    });
+    if (typeof window.updateSubmitState === 'function') window.updateSubmitState();
+  }
+  function safeRenderNow(){
+    try{
+      ensureQuestions();
+      var list = document.getElementById('qList');
+      if (!list) return;
+      if (!list.children || list.children.length === 0){
+        if (typeof window.render === 'function'){ window.render(); }
+        if (!list.children || list.children.length === 0){ fallbackBuild(); }
+      }
+    }catch(e){ console.error('Render safeguard error:', e); }
+  }
+  window.addEventListener('load', safeRenderNow);
+  if (typeof window.startSurvey === 'function' && !window.startSurvey._patched){
+    var _orig = window.startSurvey;
+    window.startSurvey = function(){ _orig.apply(this, arguments); safeRenderNow(); };
+    window.startSurvey._patched = true;
+  }
+})();
+</script>
+
+<!-- global startSurvey kept for inline onclick -->
+<script>
+window.startSurvey = window.startSurvey || function(){
+  try{
+    const home = document.getElementById('home') || document.querySelector('.home,.page');
+    const survey = document.getElementById('survey');
+    if (home && home!==survey) home.style.display='none';
+    if (survey) survey.style.display='grid';
+    window.scrollTo(0,0);
+    const first = document.querySelector('#survey button, #survey input, #survey textarea, #survey select');
+    if (first) first.focus();
+  }catch(_){}
+};
+</script>
+
+<!-- === HEARTBEAT (non-blocking; no CORS preflight) === -->
+<script>
+(function(){
+  const HEARTBEAT_MS = 120000; // every 2 minutes
+
+  function endpoint(){ return (CFG && CFG.apiUrl) || null; }
+  function val(x, d){ return (typeof x !== 'undefined' && x !== null) ? x : d; }
+
+  function hbSend(bodyStr){
+    try{
+      if (navigator.sendBeacon){
+        const ok = navigator.sendBeacon(endpoint(), new Blob([bodyStr], {type:'text/plain;charset=utf-8'}));
+        if (ok) return;
+      }
+    }catch(_){}
+    try{
+      fetch(endpoint(), {
+        method:'POST',
+        mode:'no-cors',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: bodyStr,
+        keepalive:true
+      });
+    }catch(_){}
+  }
+
+  function ping(reason){
+    const url = endpoint(); if(!url) return;
+    const payload = {
+      type: 'heartbeat',
+      token: val(CFG && CFG.token, ''),
+      clientId: val((CFG && CFG.deviceId), '') + '-' + Date.now(),
+      storeId:  val(CFG && CFG.storeId, ''),
+      deviceId: val(CFG && CFG.deviceId, ''),
+      deviceLabel: val(CFG && CFG.deviceLabel, ''),
+      pageVisible: document.visibilityState === 'visible',
+      sentAtUtc: new Date().toISOString(),
+      reason: reason || 'interval',
+      userAgent: navigator.userAgent || ''
+    };
+    hbSend(JSON.stringify(payload));
+  }
+
+  function schedule(){
+    clearInterval(window.__hbInt);
+    setTimeout(()=>ping('initial'), 15000);
+    window.__hbInt = setInterval(()=>ping('interval'), HEARTBEAT_MS);
+  }
+
+  window.addEventListener('load',   ()=>{ schedule(); ping('load'); });
+  window.addEventListener('focus',  schedule);
+  document.addEventListener('visibilitychange', ()=>{ if (document.visibilityState==='visible') schedule(); });
+})();
+</script>
+
 </body>
 </html>
